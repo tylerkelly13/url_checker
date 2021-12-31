@@ -1,0 +1,53 @@
+{
+  "name": "url_checker",
+  "author": "Tyler Kelly",
+  "packageManager": "yarn@3.1.1",
+  "version": "1.0.0",
+  "description": "Tool for checking all the links on a page, or a portion of it.",
+  "license": "MPL-2.0",
+  "main": "src/cli.ts",
+  "type": "module",
+  "bin": "./dist/cli.js",
+  "scripts": {
+    "apis": "typedoc",
+    "build": "yarn install && tsc",
+    "packer": "yarn build && yarn pack"
+  },
+  "typedocOptions": {
+    "entryPoints": [
+      "src/cli.ts"
+    ],
+    "out": "docs"
+  },
+  "files": [
+    "src",
+    "dist",
+    "LICENCE.txt",
+    "README.md"
+  ],
+  "dependencies": {
+    "commander": "^8.3.0",
+    "js-yaml": "^4.1.0",
+    "jsdom": "^18.0.0",
+    "needle": "^3.0.0",
+    "typescript": "^4.4.4"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.4",
+    "@types/jsdom": "^16.2.13",
+    "@types/needle": "^2.5.2",
+    "@types/node": "^16.11.19",
+    "@types/yargs": "^17.0.5",
+    "@typescript-eslint/eslint-plugin": "^5.2.0",
+    "@typescript-eslint/parser": "^5.2.0",
+    "eslint": "^7.32.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.1",
+    "typedoc": "^0.22.10"
+  },
+  "engines": {
+    "node": ">=10.0"
+  }
+}
