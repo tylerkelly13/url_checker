@@ -32,5 +32,12 @@ node_modules/
 
 url_checker_results.csv
 
-.yarn/
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
 dist/
