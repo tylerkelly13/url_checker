@@ -1,7 +1,6 @@
 {
   "name": "url_checker",
   "author": "Tyler Kelly",
-  "packageManager": "yarn@3.1.1",
   "version": "0.1.0",
   "description": "Tool for checking all the links on a page, or a portion of it.",
   "license": "Apache-2.0",
@@ -10,8 +9,8 @@
   "bin": "./dist/cli.js",
   "scripts": {
     "apis": "typedoc",
-    "build": "yarn install && tsc",
-    "packer": "yarn build && yarn pack"
+    "build": "npm install && tsc",
+    "packer": "npm run build && npm pack"
   },
   "typedocOptions": {
     "entryPoints": [
