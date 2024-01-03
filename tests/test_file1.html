@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- link -->
+    <link href="assets/test.css" rel="stylesheet" title="Default Style" />
+    <script src="assets/nah.js"></script>
+  </head>
+  <body background="assets/Untitled.png">
+    <!-- a -->
+    <p><a href="localhost:8976/test_file2.html">anchor</a></p> <!-- localhost -->
+    <p><a href="localhost:8976/test_file2.html#h1">anchor</a></p> <!-- localhost + anchor -->
+    <p><a href="localhost:8976/test_file2.html#oi">anchor</a></p> <!-- anchor -->
+    <p><a href="test_file2.html">anchor</a></p> <!-- relative -->
+    <p><a href="test_file2.html#one_1">anchor</a></p> <!-- relative + anchor -->
+    <p><a href="test_file2.html#two_2?search=something people search for&source=here">anchor</a></p> <!-- relative + anchor + querystring -->
+    <!-- area https://developer.mozilla.org/en-US/docs/Web/HTML/Element/area -->
+    <map name="thebutton">
+      <area shape="circle" coords="205,205,155"
+            href="localhost:8976/test_file2.html#three_3"
+            target="_blank" alt="HTTP">
+            </map>
+            <!-- img -->
+            <img usemap="#thebutton" src="assets/test_image.png" alt="Don't push the button">
+
+    <!-- blockquote -->
+    <blockquote cite="localhost:8976/test_file2.html#four_4">&lt;Insert insightful quote here&gt;</blockquote>
+    <!-- audio https://freesound.org/s/685093/ CC0 https://creativecommons.org/publicdomain/zero/1.0/ -->
+    <audio controls src="assets/685093__lxoxksrf__rain18.mp3">
+      <source src="assets/685093__lxoxksrf__rain18_copy.mp3">
+    </audio>
+    <!-- ins, del -->
+    <p><ins cite="localhost:8976/test_file2.html#five_5">yeah</ins><del cite="localhost:8976/test_file2.html#six-6">nah</del></p>
+<del cite="localhost:8976/test_file2.html#seven-7"><p>We don't need this.</p></del>
+<!-- embed -->
+<embed type="video/mp4" src="assets/my_video-1.mp4" width="100px" height="100px">
+<!-- iframe -->
+  <iframe id="test" title="test" width="100px" height="100px" src="localhost:8976/test_file2.html"></iframe>
+  <!-- img -->
+  <picture>
+    <!-- source srcset -->
+    <source srcset="assets/Untitled.png 200w assets/test_image.png 400w">
+    <img src="assets/test_image.png" alt="Don't push the button">
+  </picture>
+  <!-- img with srcset-->
+  <img src="assets/Untitled.png" srcset="assets/Untitled.png 100w assets/test_image.png 200w" alt="Don't push the button">
+  <!-- image -->
+  <image src="assets/Untitled.png"></image>
+  <form>
+    <label>Don't:
+      <!-- input-->
+      <input type="image" src="assets/test_image.png" />
+    </label>
+  </form>
+  <!-- object -->
+  <object data="assets/my_video-1.mp4" type="video/mp4"></object>
+  <!-- q -->
+  <p>Now, you're probably thinking <q cite="localhost:8976/test_file2.html#eight-8">Why shouldn't I push the button?</q></p>
+  <!-- video -->
+  <video controls src="assets/my_video-1.mp4" poster="assets/Untitled.png">
+    <!-- track -->
+    <track default kind="captions" srclang="en", src="assets/my_video-1.vtt">
+  </video>
+  <p id="oi">yeah</p>
+  <p><a href="localhost:8976/test_2.html">anchor</a></p> <!-- broken link localhost -->
+  <p><a href="test_2.html">anchor</a></p> <!-- relative broken link -->
+  <p><a href="localhost:8976/test_file2.html#nope">anchor</a></p> <!-- missing anchor -->
+  <img src="assets/ntited.pg" alt="Don't push the button"> <!-- missing image -->
+</body>
+</html>

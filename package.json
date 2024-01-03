@@ -10,7 +10,9 @@
   "scripts": {
     "apis": "typedoc",
     "build": "npm install && tsc",
-    "packer": "npm run build && npm pack"
+    "packer": "npm run build && npm pack",
+    "lint": "npx eslint src/**",
+    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha"
   },
   "typedocOptions": {
     "entryPoints": [
@@ -36,6 +38,7 @@
     "@types/jsdom": "^16.2.13",
     "@types/needle": "^2.5.2",
     "@types/node": "^16.11.19",
+    "@types/nodemon": "^1.19.2",
     "@types/yargs": "^17.0.5",
     "@typescript-eslint/eslint-plugin": "^5.2.0",
     "@typescript-eslint/parser": "^5.2.0",
@@ -44,6 +47,8 @@
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.1",
+    "mocha": "^10.2.0",
+    "nodemon": "^2.0.22",
     "typedoc": "^0.22.10"
   },
   "engines": {
