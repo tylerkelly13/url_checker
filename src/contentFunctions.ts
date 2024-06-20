@@ -20,8 +20,8 @@ const urlElements = {
   q: 'cite',
   track: 'src',
   video: [ 'src', 'poster' ],
-  source: 'src',
-  script: [ 'src', 'href' ]
+  source: [ 'src', 'srcset' ],
+  script: 'src'
 };
 
 interface elemAttrib {
