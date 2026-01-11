@@ -10,7 +10,11 @@
   "scripts": {
     "apis": "typedoc",
     "build": "npm install && tsc",
-    "packer": "npm run build && npm pack"
+    "packer": "npm run build && npm pack",
+    "lint": "eslint 'src/**/*.ts'",
+    "lint:fix": "eslint --fix 'src/**/*.ts'",
+    "format": "prettier --write 'src/**/*.ts'",
+    "format:check": "prettier --check 'src/**/*.ts'"
   },
   "typedocOptions": {
     "entryPoints": [
@@ -33,6 +37,7 @@
     "vitest": "^4.0.16"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@types/js-yaml": "^4.0.4",
     "@types/jsdom": "^27.0.0",
     "@types/needle": "^3.3.0",
@@ -41,10 +46,14 @@
     "@typescript-eslint/eslint-plugin": "^8.52.0",
     "@typescript-eslint/parser": "^8.52.0",
     "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-promise": "^7.2.1",
+    "globals": "^17.0.0",
+    "prettier": "^3.7.4",
     "typedoc": "^0.28.15"
   },
   "engines": {
