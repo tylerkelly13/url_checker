@@ -11,7 +11,7 @@ const urlElements = {
   del: 'cite',
   embed: 'src',
   iframe: 'src',
-  img: [ 'src', 'srcset' ],
+  img: ['src', 'srcset'],
   image: 'href',
   input: 'src',
   ins: 'cite',
@@ -19,40 +19,42 @@ const urlElements = {
   object: 'data',
   q: 'cite',
   track: 'src',
-  video: [ 'src', 'poster' ],
+  video: ['src', 'poster'],
   source: 'src',
-  script: [ 'src', 'href' ]
+  script: ['src', 'href']
 };
 
 interface elemAttrib {
-  element: string,
-  attribute: string
+  element: string;
+  attribute: string;
 }
 
 interface urlFound {
-  parentURL: string,
-  url: string,
-  elem: string,
+  parentURL: string;
+  url: string;
+  elem: string;
 }
 
 interface pageHTML {
-  content: HTMLElement,
-  parentURL: string,
+  content: HTMLElement;
+  parentURL: string;
 }
 
 interface pageContent {
-  body: string,
-  parentURL: string,
+  body: string;
+  parentURL: string;
 }
 
-function expandAttrArrays (entries: [string, string | string[]][]): elemAttrib[] {
+function expandAttrArrays(
+  entries: [string, string | string[]][]
+): elemAttrib[] {
   /* convert  */
   const newPairArray: elemAttrib[] = [];
-  entries.forEach(strStrOrArr => {
+  entries.forEach((strStrOrArr) => {
     const elem = strStrOrArr[0];
     const strOrArr = strStrOrArr[1];
     if (Array.isArray(strOrArr)) {
-      strOrArr.forEach(el => {
+      strOrArr.forEach((el) => {
         newPairArray.push({ element: elem, attribute: el });
       });
     } else {
@@ -62,9 +64,14 @@ function expandAttrArrays (entries: [string, string | string[]][]): elemAttrib[]
   return newPairArray;
 }
 
-const elemUrlPairs: elemAttrib[] = expandAttrArrays(Object.entries(urlElements));
+const elemUrlPairs: elemAttrib[] = expandAttrArrays(
+  Object.entries(urlElements)
+);
 
-function getUrls ({ content, parentURL }:pageHTML, urlElm = elemUrlPairs): urlFound[] {
+function getUrls(
+  { content, parentURL }: pageHTML,
+  urlElm = elemUrlPairs
+): urlFound[] {
   /**
    * Takes in HTML and URL, finds elements with URLs, returns URLS.
    *
@@ -79,14 +86,21 @@ function getUrls ({ content, parentURL }:pageHTML, urlElm = elemUrlPairs): urlFo
     for (const elem of matchingElems) {
       const urlFound = elem.getAttribute(pair.attribute);
       if (urlFound !== null) {
-        urls.push({ parentURL, url: urlFound.toString(), elem: elem.nodeName.toLowerCase() });
+        urls.push({
+          parentURL,
+          url: urlFound.toString(),
+          elem: elem.nodeName.toLowerCase()
+        });
       }
-    };
-  };
+    }
+  }
   return urls;
-};
+}
 
-function selectContent ({ body: page, parentURL: url }: pageContent, selector?:string): pageHTML {
+function selectContent(
+  { body: page, parentURL: url }: pageContent,
+  selector?: string
+): pageHTML {
   /**
    * Convert page content from a string to a JSDOM element, return the HTML element matching the selector (if provided).
    *
@@ -95,10 +109,11 @@ function selectContent ({ body: page, parentURL: url }: pageContent, selector?:s
    * @param selector [CSS selector](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors) of the HTML element to analyse.
    * @returns The page or selector HTML and the parent URL.
    */
-  const { document } = (new JSDOM(page)).window;
+  const { document } = new JSDOM(page).window;
   let selectedContent;
   if (selector !== undefined && selector !== null && selector !== '') {
-    selectedContent = document.querySelector(selector) as HTMLElement || document.body;
+    selectedContent =
+      (document.querySelector(selector) as HTMLElement) || document.body;
   } else {
     selectedContent = document.body;
   }

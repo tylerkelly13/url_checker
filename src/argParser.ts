@@ -1,23 +1,37 @@
 import { Command } from 'commander'; // https://www.npmjs.com/package/commander
 
 interface options {
-  url: string,
-  selector: string,
-  output: string,
-  format: string
+  url: string;
+  selector: string;
+  output: string;
+  format: string;
 }
 
-function argparse (args: string[]): options {
-/* argument parser */
+function argparse(args: string[]): options {
+  /* argument parser */
   const program = new Command();
   program
     .name('url_checker')
     .description('Checks for broken links on the pages provided (urls)')
-    .option('-s, --selector [css selector]', 'CSS selector for only checking part of a page (such as: "main" for the <main> element).')
-    .option('-o, --output [file]', 'File to output the results', 'url_checker_results.csv')
-    .option('-f, --format [format]', 'File format to output the results (supports: "csv")', 'csv')
+    .option(
+      '-s, --selector [css selector]',
+      'CSS selector for only checking part of a page (such as: "main" for the <main> element).'
+    )
+    .option(
+      '-o, --output [file]',
+      'File to output the results',
+      'url_checker_results.csv'
+    )
+    .option(
+      '-f, --format [format]',
+      'File format to output the results (supports: "csv")',
+      'csv'
+    )
     .enablePositionalOptions(true)
-    .requiredOption('-u, --url <url>', 'URL of the page to check including protocol (such as https://www.example.com/index.html)')
+    .requiredOption(
+      '-u, --url <url>',
+      'URL of the page to check including protocol (such as https://www.example.com/index.html)'
+    )
     .parse(args);
 
   if (program.args.length < 0) {
@@ -34,6 +48,4 @@ function argparse (args: string[]): options {
   return options || process.exit(1);
 }
 
-export {
-  argparse
-};
+export { argparse };

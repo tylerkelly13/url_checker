@@ -11,17 +11,24 @@ const defaultResultsOrder = [
   'elem'
 ];
 
-function mapMaker (objectIn: { [x: string]: any; }, order: string[]): Map<string, string> {
+function mapMaker(
+  objectIn: { [x: string]: any },
+  order: string[]
+): Map<string, string> {
   const mapping = new Map();
-  order.forEach(item => {
+  order.forEach((item) => {
     mapping.set(item, objectIn[item].toString());
   });
   return mapping;
 }
 
-async function linkCheckerCSV (finalResults: Promise<URL.results[]>, outPutFileName: string, resultsOrder: string[] = defaultResultsOrder): Promise<void> {
+async function linkCheckerCSV(
+  finalResults: Promise<URL.results[]>,
+  outPutFileName: string,
+  resultsOrder: string[] = defaultResultsOrder
+): Promise<void> {
   const results = await finalResults;
-  const arrayOfArrays = results.map(res => {
+  const arrayOfArrays = results.map((res) => {
     const map = mapMaker(res, resultsOrder);
     const newArray = [];
     for (const value of map.values()) {
@@ -29,14 +36,10 @@ async function linkCheckerCSV (finalResults: Promise<URL.results[]>, outPutFileN
     }
     return newArray;
   });
-  const concatenator: string[] = arrayOfArrays.map(array => {
+  const concatenator: string[] = arrayOfArrays.map((array) => {
     return '"' + array.join('","') + '"\n';
   });
   writeFileSync(outPutFileName, concatenator.toString());
 }
 
-export {
-  linkCheckerCSV,
-  mapMaker,
-  defaultResultsOrder
-};
+export { linkCheckerCSV, mapMaker, defaultResultsOrder };
