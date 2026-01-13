@@ -14,7 +14,11 @@
     "lint": "eslint 'src/**/*.ts'",
     "lint:fix": "eslint --fix 'src/**/*.ts'",
     "format": "prettier --write 'src/**/*.ts'",
-    "format:check": "prettier --check 'src/**/*.ts'"
+    "format:check": "prettier --check 'src/**/*.ts'",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
   },
   "typedocOptions": {
     "entryPoints": [
@@ -38,6 +42,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
+    "@fast-check/vitest": "^0.2.4",
     "@types/js-yaml": "^4.0.4",
     "@types/jsdom": "^27.0.0",
     "@types/needle": "^3.3.0",
@@ -52,6 +57,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-promise": "^7.2.1",
+    "fast-check": "^4.5.3",
     "globals": "^17.0.0",
     "prettier": "^3.7.4",
     "typedoc": "^0.28.15"

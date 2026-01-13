@@ -1,13 +1,13 @@
 import { exit } from 'process';
-import * as http from './http.js';
-import * as pageFun from './contentFunctions.js';
+import * as http from './http';
+import * as pageFun from './contentFunctions';
 
 /*
  * https://developer.mozilla.org/en-US/docs/Web/API/URL/URL
  * https://developer.mozilla.org/en-US/docs/Web/API/URL
  */
 
-interface results {
+export type results = {
   parentURL: string;
   status: string;
   statusMsg: string;
@@ -15,14 +15,14 @@ interface results {
   elem: string;
   anchored: boolean;
   anchorExists?: boolean;
-}
+};
 
-interface protocolCheck {
+export type protocolCheck = {
   fullUrl: string;
   protocol: string;
-}
+};
 
-type urlRegex = [string, RegExp][];
+export type urlRegex = [string, RegExp][];
 
 const supportedProtocolRegExp = /https?/;
 
@@ -41,15 +41,18 @@ const urlStarts: urlRegex = [
 
 const fullUrlTypes = ['fullHTTP', 'fullHTTPS', 'HTTPnoW', 'HTTPSnoW'];
 
-function regexMatchCount(inputString: string, regexp: RegExp): number {
+export const regexMatchCount = (
+  inputString: string,
+  regexp: RegExp
+): number => {
   return ((inputString || '').match(regexp) || []).length;
-}
+};
 
-function urlConstructor(
+const urlConstructor = (
   parentUrl: string,
   url: string,
   urlType: string
-): string {
+): string => {
   let fullURL: string;
   const parent = new URL(parentUrl);
   switch (urlType) {
@@ -66,9 +69,9 @@ function urlConstructor(
       break;
   }
   return fullURL;
-}
+};
 
-function anchoredChecker(validUrl: string, urlType: string): string {
+export const anchoredChecker = (validUrl: string, urlType: string): string => {
   if (urlType === 'anchor') {
     return 'anchor';
   } else if (/#[^)]/.test(validUrl)) {
@@ -76,9 +79,9 @@ function anchoredChecker(validUrl: string, urlType: string): string {
   } else {
     return 'noAnchor';
   }
-}
+};
 
-function validURLCheckFix(url: string): string {
+export const validURLCheckFix = (url: string): string => {
   /**
    * Checks if the URL is valid and complete.
    *
@@ -100,30 +103,33 @@ function validURLCheckFix(url: string): string {
     );
     return '';
   }
-}
+};
 
-function goOrNoGo(url: string): string {
+export const goOrNoGo = (url: string): string => {
   const validURL = validURLCheckFix(url);
   if (validURL === '' && validURL.length < 5) {
     exit(1);
   } else {
     return url;
   }
-}
+};
 
-function whichProtocol(
+export const whichProtocol = (
   fullUrl: string,
   protoRegExp: RegExp = supportedProtocolRegExp
-): protocolCheck {
+): protocolCheck => {
   const protocol = (fullUrl.match(protoRegExp) || ['Unsupported'])[0];
   if (protocol === 'Unsupported') {
     console.log('Unable to determine the protocol for: ' + fullUrl);
     exit(1);
   }
   return { fullUrl, protocol };
-}
+};
 
-function urlTyper(url: string, regexArr: urlRegex = urlStarts): string {
+export const urlTyper = (
+  url: string,
+  regexArr: urlRegex = urlStarts
+): string => {
   let urlType = '';
   regexArr.every((pair) => {
     if (pair[1].test(url)) {
@@ -133,13 +139,13 @@ function urlTyper(url: string, regexArr: urlRegex = urlStarts): string {
     return true;
   });
   return urlType;
-}
+};
 
-async function checkAndReturn(
+export const checkAndReturn = async (
   urlFound: pageFun.urlFound,
   page: pageFun.pageHTML,
   fullUrls: string[] = fullUrlTypes
-): Promise<results> {
+): Promise<results> => {
   const { parentURL, url, elem } = urlFound;
   // determine type
   const urlType = urlTyper(url);
@@ -215,17 +221,4 @@ async function checkAndReturn(
     anchored,
     anchorExists
   };
-}
-
-export {
-  urlRegex,
-  protocolCheck,
-  results,
-  anchoredChecker,
-  checkAndReturn,
-  goOrNoGo,
-  regexMatchCount,
-  validURLCheckFix,
-  urlTyper,
-  whichProtocol
 };

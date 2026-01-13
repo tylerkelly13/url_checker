@@ -35,7 +35,14 @@ export default [
           allowArrowFunctions: true
         }
       ],
-      'prefer-const': 'error'
+      'prefer-const': 'error',
+      'no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_'
+        }
+      ]
     }
   },
   prettierConfig

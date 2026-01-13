@@ -1,17 +1,17 @@
 import needle from 'needle';
 
-interface getContentResult {
+export type getContentResult = {
   url: string;
   content: string;
-}
+};
 
-interface getStatusResult {
+export type getStatusResult = {
   url: string;
   statusCode: string;
   statusMsg: string;
-}
+};
 
-async function getContent(url: string): Promise<getContentResult> {
+export const getContent = async (url: string): Promise<getContentResult> => {
   /**
    * Gets the page content over HTTP. Returns the content as a string.
    *
@@ -26,9 +26,9 @@ async function getContent(url: string): Promise<getContentResult> {
       return error.message;
     });
   return { url, content };
-}
+};
 
-async function getStatus(url: string): Promise<getStatusResult> {
+export const getStatus = async (url: string): Promise<getStatusResult> => {
   /**
    * Checks the status of the URL over HTTP, returns the URL and the response status code.
    *
@@ -53,6 +53,4 @@ async function getStatus(url: string): Promise<getStatusResult> {
     statusCode: statusCode.toString(),
     statusMsg: statusMessage || ''
   };
-}
-
-export { getContentResult, getStatusResult, getContent, getStatus };
+};

@@ -1,13 +1,13 @@
-import { Command } from 'commander'; // https://www.npmjs.com/package/commander
+import { Command } from 'commander';
 
-interface options {
+type options = {
   url: string;
   selector: string;
   output: string;
   format: string;
-}
+};
 
-function argparse(args: string[]): options {
+export const argparse = (args: string[]): options => {
   /* argument parser */
   const program = new Command();
   program
@@ -46,6 +46,4 @@ function argparse(args: string[]): options {
   };
 
   return options || process.exit(1);
-}
-
-export { argparse };
+};

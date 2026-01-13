@@ -1,7 +1,7 @@
 import * as URL from './urlFunctions.js';
 import { writeFileSync } from 'fs';
 
-const defaultResultsOrder = [
+export const defaultResultsOrder = [
   'parentURL',
   'url',
   'status',
@@ -11,22 +11,22 @@ const defaultResultsOrder = [
   'elem'
 ];
 
-function mapMaker(
+export const mapMaker = (
   objectIn: { [x: string]: any },
   order: string[]
-): Map<string, string> {
+): Map<string, string> => {
   const mapping = new Map();
   order.forEach((item) => {
     mapping.set(item, objectIn[item].toString());
   });
   return mapping;
-}
+};
 
-async function linkCheckerCSV(
+export const linkCheckerCSV = async (
   finalResults: Promise<URL.results[]>,
   outPutFileName: string,
   resultsOrder: string[] = defaultResultsOrder
-): Promise<void> {
+): Promise<void> => {
   const results = await finalResults;
   const arrayOfArrays = results.map((res) => {
     const map = mapMaker(res, resultsOrder);
@@ -40,6 +40,4 @@ async function linkCheckerCSV(
     return '"' + array.join('","') + '"\n';
   });
   writeFileSync(outPutFileName, concatenator.toString());
-}
-
-export { linkCheckerCSV, mapMaker, defaultResultsOrder };
+};

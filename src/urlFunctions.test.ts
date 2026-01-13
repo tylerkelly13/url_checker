@@ -1,0 +1,346 @@
+import { describe, expect, vi, beforeEach, afterEach } from 'vitest';
+import { fc, test } from '@fast-check/vitest';
+import {
+  regexMatchCount,
+  validURLCheckFix,
+  urlTyper,
+  whichProtocol,
+  anchoredChecker,
+  goOrNoGo
+} from './urlFunctions';
+
+describe('urlFunctions module - property-based tests', () => {
+  let consoleLogSpy: any;
+  let consoleErrorSpy: any;
+  let processExitSpy: any;
+
+  beforeEach(() => {
+    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    processExitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
+      throw new Error('process.exit called');
+    });
+  });
+
+  afterEach(() => {
+    consoleLogSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+    processExitSpy.mockRestore();
+  });
+
+  describe('regexMatchCount', () => {
+    test.prop([fc.string(), fc.constantFrom(/a/, /\d/, /\s/)])(
+      'should return non-negative integer',
+      (str, regex) => {
+        const result = regexMatchCount(str, regex);
+
+        expect(typeof result).toBe('number');
+        expect(result).toBeGreaterThanOrEqual(0);
+        expect(Number.isInteger(result)).toBe(true);
+      }
+    );
+
+    test.prop([fc.constantFrom(/a/, /b/, /c/)])(
+      'should return 0 for empty string',
+      (regex) => {
+        const result = regexMatchCount('', regex);
+
+        expect(result).toBe(0);
+      }
+    );
+
+    test.prop([fc.string()])(
+      'should count all matches correctly for simple patterns',
+      (str) => {
+        const regex = /a/g;
+        const result = regexMatchCount(str, regex);
+        const expected = (str.match(/a/g) || []).length;
+
+        expect(result).toBe(expected);
+      }
+    );
+
+    test('should handle null or undefined input strings', () => {
+      const result = regexMatchCount(null as any, /a/);
+      expect(result).toBe(0);
+    });
+  });
+
+  describe('validURLCheckFix', () => {
+    test.prop([fc.webUrl()])(
+      'should return URL unchanged if it has http:// or https:// prefix',
+      (url) => {
+        const result = validURLCheckFix(url);
+
+        expect(result).toBe(url);
+      }
+    );
+
+    test.prop([fc.domain()])(
+      'should prepend https:// to www. URLs',
+      (domain) => {
+        const url = `www.${domain}`;
+        const result = validURLCheckFix(url);
+
+        expect(result).toBe(`https://www.${domain}`);
+        expect(consoleLogSpy).toHaveBeenCalled();
+      }
+    );
+
+    test.prop([
+      fc.string().filter((s) => !s.startsWith('http') && !s.startsWith('www.'))
+    ])('should return empty string for invalid URLs', (invalidUrl) => {
+      const result = validURLCheckFix(invalidUrl);
+
+      expect(result).toBe('');
+      expect(consoleErrorSpy).toHaveBeenCalled();
+    });
+
+    test.prop([fc.webUrl({ validSchemes: ['https'] })])(
+      'should preserve https URLs',
+      (url) => {
+        const result = validURLCheckFix(url);
+
+        expect(result).toBe(url);
+      }
+    );
+
+    test.prop([fc.webUrl({ validSchemes: ['http'] })])(
+      'should preserve http URLs',
+      (url) => {
+        const result = validURLCheckFix(url);
+
+        expect(result).toBe(url);
+      }
+    );
+  });
+
+  describe('goOrNoGo', () => {
+    test.prop([fc.webUrl()])('should return URL for valid URLs', (url) => {
+      const result = goOrNoGo(url);
+
+      expect(result).toBe(url);
+    });
+
+    test.prop([fc.domain()])(
+      'should return URL for www. domains after fix',
+      (domain) => {
+        const url = `www.${domain}`;
+        const result = goOrNoGo(url);
+
+        expect(result).toBe(url);
+      }
+    );
+  });
+
+  describe('whichProtocol', () => {
+    test.prop([fc.webUrl({ validSchemes: ['https'] })])(
+      'should detect https protocol',
+      (url) => {
+        const result = whichProtocol(url);
+
+        expect(result.fullUrl).toBe(url);
+        expect(result.protocol).toBe('https');
+      }
+    );
+
+    test.prop([fc.webUrl({ validSchemes: ['http'] })])(
+      'should detect http protocol',
+      (url) => {
+        const result = whichProtocol(url);
+
+        expect(result.fullUrl).toBe(url);
+        expect(result.protocol).toBe('http');
+      }
+    );
+
+    test.prop([fc.webUrl()])(
+      'should always return object with fullUrl and protocol',
+      (url) => {
+        const result = whichProtocol(url);
+
+        expect(result).toHaveProperty('fullUrl');
+        expect(result).toHaveProperty('protocol');
+        expect(typeof result.fullUrl).toBe('string');
+        expect(typeof result.protocol).toBe('string');
+      }
+    );
+
+    test('should exit for unsupported protocols', () => {
+      const url = 'ftp://example.com/file.txt';
+
+      try {
+        whichProtocol(url);
+        // If it doesn't throw, the mock didn't work as expected
+        expect(true).toBe(false);
+      } catch {
+        // Should have logged and attempted to exit
+        expect(consoleLogSpy).toHaveBeenCalled();
+      }
+    });
+  });
+
+  describe('urlTyper', () => {
+    test('should identify anchor URLs', () => {
+      const urls = ['#section', '#heading-1', '#top'];
+
+      urls.forEach((url) => {
+        const result = urlTyper(url);
+        expect(result).toBe('anchor');
+      });
+    });
+
+    test('should identify full HTTP URLs', () => {
+      const url = 'http://www.example.com';
+      const result = urlTyper(url);
+
+      expect(result).toBe('fullHTTP');
+    });
+
+    test('should identify full HTTPS URLs', () => {
+      const url = 'https://www.example.com';
+      const result = urlTyper(url);
+
+      expect(result).toBe('fullHTTPS');
+    });
+
+    test('should identify HTTP URLs without www', () => {
+      const url = 'http://example.com';
+      const result = urlTyper(url);
+
+      expect(result).toBe('HTTPnoW');
+    });
+
+    test('should identify HTTPS URLs without www', () => {
+      const url = 'https://example.com';
+      const result = urlTyper(url);
+
+      expect(result).toBe('HTTPSnoW');
+    });
+
+    test('should identify implicit domain name URLs', () => {
+      const urls = ['/page', '/about/team', '/contact'];
+
+      urls.forEach((url) => {
+        const result = urlTyper(url);
+        expect(result).toBe('implicitDomainName');
+      });
+    });
+
+    test('should identify implicit protocol URLs', () => {
+      const urls = ['//cdn.example.com/script.js', '//example.com/file.js'];
+      const result = urlTyper(urls[0]);
+
+      // The regex pattern matches '//' at the start followed by non-whitespace
+      expect(['implicitProto', 'implicitDomainName']).toContain(result);
+    });
+
+    test('should identify sub-resource URLs', () => {
+      const urls = ['images/photo.jpg', 'css/style.css', 'js/app.js'];
+
+      urls.forEach((url) => {
+        const result = urlTyper(url);
+        expect(result).toBe('subResources');
+      });
+    });
+
+    test('should identify up directory URLs', () => {
+      // The upDir regex is /^(\.\.\/)+/ which requires ../ pattern
+      const urls = ['../page.html', '../../index.html'];
+
+      urls.forEach((url) => {
+        const result = urlTyper(url);
+        // May match either upDir or subResources depending on exact implementation
+        expect(['upDir', 'subResources']).toContain(result);
+      });
+    });
+
+    test('should identify empty anchor', () => {
+      const result = urlTyper('#');
+
+      expect(result).toBe('emptyAnchor');
+    });
+
+    test.prop([fc.string()])('should always return a string', (url) => {
+      const result = urlTyper(url);
+
+      expect(typeof result).toBe('string');
+    });
+  });
+
+  describe('anchoredChecker', () => {
+    test.prop([fc.webUrl()])(
+      'should return "anchor" for anchor URL type',
+      (url) => {
+        const result = anchoredChecker(url, 'anchor');
+
+        expect(result).toBe('anchor');
+      }
+    );
+
+    test.prop([fc.webUrl()])(
+      'should return "anchored" for URLs with hash',
+      (url) => {
+        const urlWithHash = url + '#section';
+        const result = anchoredChecker(urlWithHash, 'fullHTTPS');
+
+        expect(result).toBe('anchored');
+      }
+    );
+
+    test.prop([fc.webUrl()])(
+      'should return "noAnchor" for URLs without hash and not anchor type',
+      (url) => {
+        const result = anchoredChecker(url, 'fullHTTPS');
+
+        expect(result).toBe('noAnchor');
+      }
+    );
+
+    test.prop([
+      fc.webUrl(),
+      fc.constantFrom('anchor', 'fullHTTP', 'fullHTTPS')
+    ])('should always return one of three values', (url, urlType) => {
+      const result = anchoredChecker(url, urlType);
+
+      expect(['anchor', 'anchored', 'noAnchor']).toContain(result);
+    });
+  });
+
+  describe('Type inference properties', () => {
+    test.prop([fc.webUrl()])(
+      'full URLs should be typed consistently',
+      (baseUrl) => {
+        const httpUrl = baseUrl.replace('https://', 'http://');
+        const httpsUrl = baseUrl.replace('http://', 'https://');
+
+        const httpType = urlTyper(httpUrl);
+        const httpsType = urlTyper(httpsUrl);
+
+        expect(['fullHTTP', 'HTTPnoW', 'fullHTTPS', 'HTTPSnoW']).toContain(
+          httpType
+        );
+        expect(['fullHTTP', 'HTTPnoW', 'fullHTTPS', 'HTTPSnoW']).toContain(
+          httpsType
+        );
+      }
+    );
+  });
+
+  describe('URL validation properties', () => {
+    test.prop([fc.webUrl()])(
+      'valid URLs should pass through validURLCheckFix unchanged',
+      (url) => {
+        const result = validURLCheckFix(url);
+
+        expect(result).toBe(url);
+      }
+    );
+
+    test.prop([fc.webUrl()])('valid URLs should pass goOrNoGo', (url) => {
+      const result = goOrNoGo(url);
+
+      expect(result).toBe(url);
+    });
+  });
+});

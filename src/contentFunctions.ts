@@ -24,30 +24,30 @@ const urlElements = {
   script: ['src', 'href']
 };
 
-interface elemAttrib {
+export type elemAttrib = {
   element: string;
   attribute: string;
-}
+};
 
-interface urlFound {
+export type urlFound = {
   parentURL: string;
   url: string;
   elem: string;
-}
+};
 
-interface pageHTML {
+export type pageHTML = {
   content: HTMLElement;
   parentURL: string;
-}
+};
 
-interface pageContent {
+export type pageContent = {
   body: string;
   parentURL: string;
-}
+};
 
-function expandAttrArrays(
+const expandAttrArrays = (
   entries: [string, string | string[]][]
-): elemAttrib[] {
+): elemAttrib[] => {
   /* convert  */
   const newPairArray: elemAttrib[] = [];
   entries.forEach((strStrOrArr) => {
@@ -62,16 +62,16 @@ function expandAttrArrays(
     }
   });
   return newPairArray;
-}
+};
 
-const elemUrlPairs: elemAttrib[] = expandAttrArrays(
+export const elemUrlPairs: elemAttrib[] = expandAttrArrays(
   Object.entries(urlElements)
 );
 
-function getUrls(
+export const getUrls = (
   { content, parentURL }: pageHTML,
   urlElm = elemUrlPairs
-): urlFound[] {
+): urlFound[] => {
   /**
    * Takes in HTML and URL, finds elements with URLs, returns URLS.
    *
@@ -95,12 +95,12 @@ function getUrls(
     }
   }
   return urls;
-}
+};
 
-function selectContent(
+export const selectContent = (
   { body: page, parentURL: url }: pageContent,
   selector?: string
-): pageHTML {
+): pageHTML => {
   /**
    * Convert page content from a string to a JSDOM element, return the HTML element matching the selector (if provided).
    *
@@ -118,14 +118,4 @@ function selectContent(
     selectedContent = document.body;
   }
   return { content: selectedContent, parentURL: url };
-}
-
-export {
-  getUrls,
-  selectContent,
-  elemUrlPairs,
-  elemAttrib,
-  urlFound,
-  pageHTML,
-  pageContent
 };
