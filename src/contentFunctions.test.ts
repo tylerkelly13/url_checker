@@ -1,10 +1,11 @@
-import { describe, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { fc, test } from '@fast-check/vitest';
 import {
   getUrls,
   selectContent,
   elemUrlPairs,
-  elemAttrib
+  elemAttrib,
+  findLineColumn
 } from './contentFunctions.js';
 
 describe('contentFunctions module - property-based tests', () => {
@@ -277,5 +278,99 @@ describe('contentFunctions module - property-based tests', () => {
         expect(urls[0].url).toBe('https://inside.com');
       }
     );
+  });
+
+  describe('findLineColumn', () => {
+    it('should find line and column for a substring', () => {
+      const source =
+        '<html>\n<body>\n<a href="test">Link</a>\n</body>\n</html>';
+      const result = findLineColumn(source, 'href="test"');
+
+      expect(result).toBeDefined();
+      expect(result?.line).toBe(3);
+      expect(result?.column).toBe(4);
+    });
+
+    it('should return undefined when substring is not found', () => {
+      const source = '<html><body>Test</body></html>';
+      const result = findLineColumn(source, 'notfound');
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should find second occurrence with startIndex', () => {
+      const source = '<a href="first">A</a>\n<a href="second">B</a>';
+      const firstResult = findLineColumn(source, 'href=');
+      const secondResult = findLineColumn(source, 'href=', 10);
+
+      expect(firstResult?.line).toBe(1);
+      expect(secondResult?.line).toBe(2);
+    });
+
+    it('should handle URLs at start of file', () => {
+      const source = 'href="test" something';
+      const result = findLineColumn(source, 'href="test"');
+
+      expect(result?.line).toBe(1);
+      expect(result?.column).toBe(1);
+    });
+
+    it('should correctly count lines with multiple newlines', () => {
+      const source = 'line1\nline2\nline3\nhref="test"';
+      const result = findLineColumn(source, 'href="test"');
+
+      expect(result?.line).toBe(4);
+      expect(result?.column).toBe(1);
+    });
+  });
+
+  describe('getUrls with line numbers', () => {
+    it('should include line and column when sourceHTML is provided', () => {
+      const parentURL = 'https://example.com';
+      const body =
+        '<html>\n<body>\n<a href="https://test.com">Link</a>\n</body>\n</html>';
+      const content = selectContent({ body, parentURL });
+
+      const urls = getUrls(content);
+
+      expect(urls.length).toBe(1);
+      expect(urls[0].line).toBeDefined();
+      expect(urls[0].column).toBeDefined();
+      expect(urls[0].line).toBe(3);
+    });
+
+    it('should handle multiple URLs on different lines', () => {
+      const parentURL = 'https://example.com';
+      const body = `<html>
+<body>
+<a href="https://first.com">First</a>
+<a href="https://second.com">Second</a>
+</body>
+</html>`;
+      const content = selectContent({ body, parentURL });
+
+      const urls = getUrls(content);
+
+      expect(urls.length).toBe(2);
+      expect(urls[0].line).toBe(3);
+      expect(urls[1].line).toBe(4);
+    });
+
+    it('should handle duplicate URLs on different lines', () => {
+      const parentURL = 'https://example.com';
+      const body = `<html>
+<body>
+<a href="https://same.com">First</a>
+<a href="https://same.com">Second</a>
+</body>
+</html>`;
+      const content = selectContent({ body, parentURL });
+
+      const urls = getUrls(content);
+
+      expect(urls.length).toBe(2);
+      expect(urls[0].line).toBe(3);
+      expect(urls[1].line).toBe(4);
+    });
   });
 });

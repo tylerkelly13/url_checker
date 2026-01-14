@@ -31,7 +31,8 @@ describe('urlChecker module - property-based tests', () => {
           protocol: 'https'
         });
 
-        const mockContent = '<html><body><a href="https://example.com">Link</a></body></html>';
+        const mockContent =
+          '<html><body><a href="https://example.com">Link</a></body></html>';
         vi.spyOn(http, 'getContent').mockResolvedValue({
           content: mockContent,
           url: url
@@ -295,7 +296,8 @@ describe('urlChecker module - property-based tests', () => {
             protocol: 'https'
           });
         const getContentSpy = vi.spyOn(http, 'getContent').mockResolvedValue({
-          content: '<html><body><a href="https://example.com">Link</a></body></html>',
+          content:
+            '<html><body><a href="https://example.com">Link</a></body></html>',
           url: url
         });
         const selectContentSpy = vi
@@ -304,9 +306,11 @@ describe('urlChecker module - property-based tests', () => {
             content: {} as any,
             parentURL: url
           });
-        const getUrlsSpy = vi.spyOn(pageFun, 'getUrls').mockReturnValue([
-          { url: 'https://example.com', parentURL: url, elem: 'a' }
-        ]);
+        const getUrlsSpy = vi
+          .spyOn(pageFun, 'getUrls')
+          .mockReturnValue([
+            { url: 'https://example.com', parentURL: url, elem: 'a' }
+          ]);
         const checkAndReturnSpy = vi
           .spyOn(URL, 'checkAndReturn')
           .mockResolvedValue({
@@ -361,7 +365,11 @@ describe('urlChecker module - property-based tests', () => {
           .spyOn(pageFun, 'selectContent')
           .mockReturnValue(mockContent);
 
-        const mockUrlFound = { url: 'https://example.com', parentURL: url, elem: 'a' };
+        const mockUrlFound = {
+          url: 'https://example.com',
+          parentURL: url,
+          elem: 'a'
+        };
         vi.spyOn(pageFun, 'getUrls').mockReturnValue([mockUrlFound]);
 
         const checkAndReturnSpy = vi
@@ -404,7 +412,8 @@ describe('urlChecker module - property-based tests', () => {
         });
 
         vi.spyOn(http, 'getContent').mockResolvedValue({
-          content: '<html><body><a href="https://example.com">Link</a></body></html>',
+          content:
+            '<html><body><a href="https://example.com">Link</a></body></html>',
           url: url
         });
 

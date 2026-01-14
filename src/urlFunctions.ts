@@ -15,6 +15,8 @@ export type results = {
   elem: string;
   anchored: boolean;
   anchorExists?: boolean;
+  line?: number;
+  column?: number;
 };
 
 export type protocolCheck = {
@@ -146,7 +148,7 @@ export const checkAndReturn = async (
   page: pageFun.pageHTML,
   fullUrls: string[] = fullUrlTypes
 ): Promise<results> => {
-  const { parentURL, url, elem } = urlFound;
+  const { parentURL, url, elem, line, column } = urlFound;
   // determine type
   const urlType = urlTyper(url);
   // complete URL?
@@ -219,6 +221,8 @@ export const checkAndReturn = async (
     url,
     elem,
     anchored,
-    anchorExists
+    anchorExists,
+    line,
+    column
   };
 };

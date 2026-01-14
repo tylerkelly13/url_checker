@@ -24,7 +24,7 @@ export const argparse = (args: string[]): options => {
     )
     .option(
       '-f, --format [format]',
-      'File format to output the results (supports: "csv")',
+      'File format to output the results (supports: "csv", "json", "yaml", "sarif")',
       'csv'
     )
     .enablePositionalOptions(true)
