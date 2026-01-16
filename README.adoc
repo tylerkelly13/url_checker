@@ -4,17 +4,52 @@ A command-line tool for checking broken links on web pages.
 
 == Usage
 
+[source,bash]
 ----
-Usage: url_checker [options]
+url_checker [options] <url>
+----
 
-Checks for broken links on the pages provided (urls)
+=== Arguments
 
-Options:
-  -s, --selector [css selector]  CSS selector for only checking part of a page (such as: "main" for the <main> element).
-  -o, --output [file]            File to output the results (default: "url_checker_results.csv")
-  -f, --format [format]          File format to output the results (supports: "csv", "json", "yaml", "sarif") (default: "csv")
-  -u, --url <url>                URL of the page to check including protocol (such as https://www.example.com/index.html)
-  -h, --help                     display help for command
+url::
+  URL of the page to check (including protocol, e.g. `https://example.com`).
+  Can also be specified with `-u` flag.
+
+=== Options
+
+`-u, --url <url>`::
+  URL of the page to check (alternative to positional argument).
+
+`-s, --selector <css selector>`::
+  CSS selector for checking part of a page (e.g. `main` for the `<main>` element).
+
+`-o, --output <file>`::
+  File to output the results. Default: `url_checker_results.csv`
+
+`-f, --format <format>`::
+  Output format: `csv`, `json`, `yaml`, or `sarif`. Default: `csv`
+
+`-a, --all`::
+  Output all results. By default, only non-2XX statuses (errors, redirects) are shown.
+
+`-h, --help`::
+  Display help for command.
+
+=== Examples
+
+[source,bash]
+----
+# Check a URL (positional argument)
+url_checker https://example.com
+
+# Check with options before or after the URL
+url_checker --all https://example.com -o results.json -f json
+
+# Check only the main content area
+url_checker https://example.com -s main
+
+# Output all links including successful ones
+url_checker https://example.com --all
 ----
 
 == Output Formats
