@@ -316,12 +316,10 @@ describe('urlChecker module - property-based tests', () => {
           .mockResolvedValue({
             parentURL: url,
             url: 'https://example.com',
-            statusCode: 200,
-            statusMessage: 'OK',
-            fullOrRelative: 'full',
-            anchoredOrNot: 'noAnchor',
-            urlType: 'fullHTTPS',
-            element: 'a'
+            status: '200',
+            statusMsg: 'OK',
+            elem: 'a',
+            anchored: false
           });
 
         await urlChecker(url);

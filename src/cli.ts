@@ -5,18 +5,23 @@ import { urlChecker } from './urlChecker';
 import { linkCheckerCSV } from './csvOut';
 import { linkCheckerJSON, linkCheckerYAML } from './jsonYamlOut';
 import { linkCheckerSARIF } from './sarifOut';
+import { filterNon2XX } from './urlFunctions';
 import { exit } from 'process';
 
 const inputs = argparse(process.argv);
 
+const resultsPromise = urlChecker(inputs.url, inputs.selector).then(
+  (results) => (inputs.all ? results : filterNon2XX(results))
+);
+
 if (inputs.format === 'csv') {
-  linkCheckerCSV(urlChecker(inputs.url, inputs.selector), inputs.output);
+  linkCheckerCSV(resultsPromise, inputs.output);
 } else if (inputs.format === 'json') {
-  linkCheckerJSON(urlChecker(inputs.url, inputs.selector), inputs.output);
+  linkCheckerJSON(resultsPromise, inputs.output);
 } else if (inputs.format === 'yaml') {
-  linkCheckerYAML(urlChecker(inputs.url, inputs.selector), inputs.output);
+  linkCheckerYAML(resultsPromise, inputs.output);
 } else if (inputs.format === 'sarif') {
-  linkCheckerSARIF(urlChecker(inputs.url, inputs.selector), inputs.output);
+  linkCheckerSARIF(resultsPromise, inputs.output);
 } else {
   console.log('unsupported output format.');
   exit(1);

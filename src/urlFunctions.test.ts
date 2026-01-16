@@ -6,7 +6,10 @@ import {
   urlTyper,
   whichProtocol,
   anchoredChecker,
-  goOrNoGo
+  goOrNoGo,
+  isNon2XX,
+  filterNon2XX,
+  results
 } from './urlFunctions';
 
 describe('urlFunctions module - property-based tests', () => {
@@ -341,6 +344,100 @@ describe('urlFunctions module - property-based tests', () => {
       const result = goOrNoGo(url);
 
       expect(result).toBe(url);
+    });
+  });
+
+  describe('isNon2XX', () => {
+    const makeResult = (status: string): results => ({
+      parentURL: 'https://example.com',
+      url: 'https://example.com/page',
+      status,
+      statusMsg: 'Test',
+      elem: 'a',
+      anchored: false
+    });
+
+    test('should return true for 1XX status codes', () => {
+      expect(isNon2XX(makeResult('100'))).toBe(true);
+      expect(isNon2XX(makeResult('101'))).toBe(true);
+    });
+
+    test('should return false for 2XX status codes', () => {
+      expect(isNon2XX(makeResult('200'))).toBe(false);
+      expect(isNon2XX(makeResult('201'))).toBe(false);
+      expect(isNon2XX(makeResult('204'))).toBe(false);
+      expect(isNon2XX(makeResult('299'))).toBe(false);
+    });
+
+    test('should return true for 3XX status codes', () => {
+      expect(isNon2XX(makeResult('301'))).toBe(true);
+      expect(isNon2XX(makeResult('302'))).toBe(true);
+      expect(isNon2XX(makeResult('304'))).toBe(true);
+    });
+
+    test('should return true for 4XX status codes', () => {
+      expect(isNon2XX(makeResult('400'))).toBe(true);
+      expect(isNon2XX(makeResult('404'))).toBe(true);
+      expect(isNon2XX(makeResult('403'))).toBe(true);
+    });
+
+    test('should return true for 5XX status codes', () => {
+      expect(isNon2XX(makeResult('500'))).toBe(true);
+      expect(isNon2XX(makeResult('502'))).toBe(true);
+      expect(isNon2XX(makeResult('503'))).toBe(true);
+    });
+
+    test('should return true for special status codes (000, 999)', () => {
+      expect(isNon2XX(makeResult('000'))).toBe(true);
+      expect(isNon2XX(makeResult('999'))).toBe(true);
+    });
+  });
+
+  describe('filterNon2XX', () => {
+    const makeResult = (status: string): results => ({
+      parentURL: 'https://example.com',
+      url: 'https://example.com/page',
+      status,
+      statusMsg: 'Test',
+      elem: 'a',
+      anchored: false
+    });
+
+    test('should filter out 2XX status codes', () => {
+      const results = [
+        makeResult('200'),
+        makeResult('404'),
+        makeResult('301'),
+        makeResult('201'),
+        makeResult('500')
+      ];
+
+      const filtered = filterNon2XX(results);
+
+      expect(filtered).toHaveLength(3);
+      expect(filtered.map((r) => r.status)).toEqual(['404', '301', '500']);
+    });
+
+    test('should return empty array when all are 2XX', () => {
+      const results = [makeResult('200'), makeResult('201'), makeResult('204')];
+
+      const filtered = filterNon2XX(results);
+
+      expect(filtered).toHaveLength(0);
+    });
+
+    test('should return all results when none are 2XX', () => {
+      const results = [makeResult('404'), makeResult('500'), makeResult('301')];
+
+      const filtered = filterNon2XX(results);
+
+      expect(filtered).toHaveLength(3);
+    });
+
+    test('should return empty array for empty input', () => {
+      const filtered = filterNon2XX([]);
+
+      expect(filtered).toHaveLength(0);
     });
   });
 });

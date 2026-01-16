@@ -5,6 +5,7 @@ type options = {
   selector: string;
   output: string;
   format: string;
+  all: boolean;
 };
 
 export const argparse = (args: string[]): options => {
@@ -13,9 +14,14 @@ export const argparse = (args: string[]): options => {
   program
     .name('url_checker')
     .description('Checks for broken links on the pages provided (urls)')
+    .argument('[url]', 'URL of the page to check')
+    .option(
+      '-u, --url <url>',
+      'URL of the page to check (alternative to positional argument)'
+    )
     .option(
       '-s, --selector [css selector]',
-      'CSS selector for only checking part of a page (such as: "main" for the <main> element).'
+      'CSS selector for checking part of a page (such as: "main" for the <main> element).'
     )
     .option(
       '-o, --output [file]',
@@ -27,23 +33,31 @@ export const argparse = (args: string[]): options => {
       'File format to output the results (supports: "csv", "json", "yaml", "sarif")',
       'csv'
     )
-    .enablePositionalOptions(true)
-    .requiredOption(
-      '-u, --url <url>',
-      'URL of the page to check including protocol (such as https://www.example.com/index.html)'
+    .option(
+      '-a, --all',
+      'Output all results (by default, non-2XX statuses are shown)',
+      false
     )
     .parse(args);
 
-  if (program.args.length < 0) {
+  const positionalUrl = program.args[0];
+  const optionUrl = program.opts().url;
+  const url = positionalUrl || optionUrl;
+
+  if (!url) {
+    console.error(
+      'Error: URL is required. Provide as argument or use -u flag.'
+    );
     program.help();
   }
 
   const options = {
-    url: program.opts().url,
+    url,
     selector: program.opts().selector,
     output: program.opts().output,
-    format: program.opts().format
+    format: program.opts().format,
+    all: program.opts().all
   };
 
-  return options || process.exit(1);
+  return options;
 };

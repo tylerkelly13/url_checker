@@ -19,6 +19,15 @@ export type results = {
   column?: number;
 };
 
+export const isNon2XX = (result: results): boolean => {
+  const status = parseInt(result.status, 10);
+  return status < 200 || status >= 300;
+};
+
+export const filterNon2XX = (results: results[]): results[] => {
+  return results.filter(isNon2XX);
+};
+
 export type protocolCheck = {
   fullUrl: string;
   protocol: string;

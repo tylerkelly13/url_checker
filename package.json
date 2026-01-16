@@ -1,16 +1,17 @@
 {
   "name": "url_checker",
   "author": "Tyler Kelly",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Tool for checking all the links on a page, or a portion of it.",
   "license": "Apache-2.0",
   "main": "src/cli.ts",
   "type": "module",
   "bin": "./dist/cli.js",
   "scripts": {
+    "url_checker": "tsx ./src/cli.ts",
     "apis": "typedoc",
-    "build": "npm install && tsc",
-    "packer": "npm run build && npm pack",
+    "build": "pnpm install && tsc",
+    "packer": "pnpm run build && pnpm pack",
     "lint": "eslint 'src/**/*.ts'",
     "lint:fix": "eslint --fix 'src/**/*.ts'",
     "format": "prettier --write 'src/**/*.ts'",
@@ -60,6 +61,7 @@
     "fast-check": "^4.5.3",
     "globals": "^17.0.0",
     "prettier": "^3.7.4",
+    "tsx": "^4.21.0",
     "typedoc": "^0.28.15"
   },
   "engines": {
