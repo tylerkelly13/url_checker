@@ -6,6 +6,7 @@ type options = {
   output: string;
   format: string;
   all: boolean;
+  internal: boolean;
 };
 
 export const argparse = (args: string[]): options => {
@@ -38,6 +39,11 @@ export const argparse = (args: string[]): options => {
       'Output all results (by default, non-2XX statuses are shown)',
       false
     )
+    .option(
+      '-i, --internal',
+      'Only check internal URLs (ignore external http/https URLs)',
+      false
+    )
     .parse(args);
 
   const positionalUrl = program.args[0];
@@ -56,7 +62,8 @@ export const argparse = (args: string[]): options => {
     selector: program.opts().selector,
     output: program.opts().output,
     format: program.opts().format,
-    all: program.opts().all
+    all: program.opts().all,
+    internal: program.opts().internal
   };
 
   return options;

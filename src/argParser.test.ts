@@ -154,6 +154,38 @@ describe('argParser module - property-based tests', () => {
     });
   });
 
+  describe('--internal flag', () => {
+    test.prop([fc.webUrl()])(
+      'should default to false when --internal flag is not provided',
+      (url) => {
+        const args = ['node', 'script.js', '-u', url];
+        const result = argparse(args);
+
+        expect(result.internal).toBe(false);
+      }
+    );
+
+    test.prop([fc.webUrl()])(
+      'should be true when --internal flag is provided',
+      (url) => {
+        const args = ['node', 'script.js', '-u', url, '--internal'];
+        const result = argparse(args);
+
+        expect(result.internal).toBe(true);
+      }
+    );
+
+    test.prop([fc.webUrl()])(
+      'should be true when -i short flag is provided',
+      (url) => {
+        const args = ['node', 'script.js', '-u', url, '-i'];
+        const result = argparse(args);
+
+        expect(result.internal).toBe(true);
+      }
+    );
+  });
+
   describe('Result interface properties', () => {
     test.prop([fc.webUrl()])(
       'should always return object with all required properties',
@@ -165,6 +197,7 @@ describe('argParser module - property-based tests', () => {
         expect(result).toHaveProperty('selector');
         expect(result).toHaveProperty('output');
         expect(result).toHaveProperty('format');
+        expect(result).toHaveProperty('internal');
       }
     );
 

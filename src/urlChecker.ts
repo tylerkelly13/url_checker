@@ -4,7 +4,8 @@ import * as http from './http';
 
 export const urlChecker = async (
   url: string,
-  selector?: string
+  selector?: string,
+  internal: boolean = false
 ): Promise<URL.results[]> => {
   // validate
   const parentURL = URL.goOrNoGo(url);
@@ -19,7 +20,11 @@ export const urlChecker = async (
       );
     })
     .then((parentContent) => {
-      return { urls: pageFun.getUrls(parentContent), content: parentContent };
+      let urls = pageFun.getUrls(parentContent);
+      if (internal) {
+        urls = URL.filterExternalUrls(urls);
+      }
+      return { urls, content: parentContent };
     })
     .then((urlsFoundInParent) => {
       return urlsFoundInParent.urls.map(async (url) => {

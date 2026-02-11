@@ -9,6 +9,8 @@ import {
   goOrNoGo,
   isNon2XX,
   filterNon2XX,
+  isExternalUrl,
+  filterExternalUrls,
   results
 } from './urlFunctions';
 
@@ -232,10 +234,11 @@ describe('urlFunctions module - property-based tests', () => {
 
     test('should identify implicit protocol URLs', () => {
       const urls = ['//cdn.example.com/script.js', '//example.com/file.js'];
-      const result = urlTyper(urls[0]);
 
-      // The regex pattern matches '//' at the start followed by non-whitespace
-      expect(['implicitProto', 'implicitDomainName']).toContain(result);
+      urls.forEach((url) => {
+        const result = urlTyper(url);
+        expect(result).toBe('implicitProto');
+      });
     });
 
     test('should identify sub-resource URLs', () => {
@@ -436,6 +439,94 @@ describe('urlFunctions module - property-based tests', () => {
 
     test('should return empty array for empty input', () => {
       const filtered = filterNon2XX([]);
+
+      expect(filtered).toHaveLength(0);
+    });
+  });
+
+  describe('isExternalUrl', () => {
+    test('should return true for full HTTP URLs', () => {
+      expect(isExternalUrl('http://www.example.com')).toBe(true);
+      expect(isExternalUrl('http://example.com')).toBe(true);
+    });
+
+    test('should return true for full HTTPS URLs', () => {
+      expect(isExternalUrl('https://www.example.com')).toBe(true);
+      expect(isExternalUrl('https://example.com')).toBe(true);
+    });
+
+    test('should return true for implicit protocol URLs', () => {
+      expect(isExternalUrl('//cdn.example.com/file.js')).toBe(true);
+    });
+
+    test('should return false for anchor URLs', () => {
+      expect(isExternalUrl('#section')).toBe(false);
+      expect(isExternalUrl('#')).toBe(false);
+    });
+
+    test('should return false for implicit domain name URLs', () => {
+      expect(isExternalUrl('/about/page')).toBe(false);
+      expect(isExternalUrl('/contact')).toBe(false);
+    });
+
+    test('should return false for sub-resource URLs', () => {
+      expect(isExternalUrl('images/photo.jpg')).toBe(false);
+      expect(isExternalUrl('css/style.css')).toBe(false);
+    });
+
+    test('should return false for up directory URLs', () => {
+      expect(isExternalUrl('../page.html')).toBe(false);
+    });
+  });
+
+  describe('filterExternalUrls', () => {
+    const makeUrlFound = (url: string) => ({
+      parentURL: 'https://example.com',
+      url,
+      elem: 'a'
+    });
+
+    test('should filter out external URLs', () => {
+      const urls = [
+        makeUrlFound('https://www.external.com'),
+        makeUrlFound('/internal/page'),
+        makeUrlFound('http://example.org'),
+        makeUrlFound('#section')
+      ];
+
+      const filtered = filterExternalUrls(urls);
+
+      expect(filtered).toHaveLength(2);
+      expect(filtered.map((u) => u.url)).toEqual(['/internal/page', '#section']);
+    });
+
+    test('should return all URLs when none are external', () => {
+      const urls = [
+        makeUrlFound('/about'),
+        makeUrlFound('#contact'),
+        makeUrlFound('images/logo.png'),
+        makeUrlFound('../parent.html')
+      ];
+
+      const filtered = filterExternalUrls(urls);
+
+      expect(filtered).toHaveLength(4);
+    });
+
+    test('should return empty array when all are external', () => {
+      const urls = [
+        makeUrlFound('https://example.com'),
+        makeUrlFound('http://www.test.org'),
+        makeUrlFound('https://www.another.com')
+      ];
+
+      const filtered = filterExternalUrls(urls);
+
+      expect(filtered).toHaveLength(0);
+    });
+
+    test('should return empty array for empty input', () => {
+      const filtered = filterExternalUrls([]);
 
       expect(filtered).toHaveLength(0);
     });

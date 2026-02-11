@@ -32,6 +32,9 @@ url::
 `-a, --all`::
   Output all results. By default, only non-2XX statuses (errors, redirects) are shown.
 
+`-i, --internal`::
+  Only check internal URLs. Filters out external URLs (http/https links to other domains) and only checks internal paths, anchors, and relative URLs.
+
 `-h, --help`::
   Display help for command.
 
@@ -50,6 +53,9 @@ url_checker https://example.com -s main
 
 # Output all links including successful ones
 url_checker https://example.com --all
+
+# Check only internal links (ignore external URLs)
+url_checker https://example.com --internal
 ----
 
 == Output Formats
@@ -101,5 +107,6 @@ url_checker -u https://example.com -f sarif -o results.sarif
 * Validates anchor links within pages
 * Tracks duplicate URLs on different lines
 * Supports CSS selectors to check specific page sections
+* Filter to check only internal URLs (ignore external links)
 * Multiple output formats for different use cases
 * Line-accurate reporting in SARIF format

@@ -43,14 +43,33 @@ const urlStarts: urlRegex = [
   ['fullHTTPS', /^https:\/\/www\./],
   ['HTTPnoW', /^http:\/\/(?!www\.)/],
   ['HTTPSnoW', /^https:\/\/(?!www\.)/],
-  ['implicitDomainName', /^\/[^\s]+/],
   ['implicitProto', /^\/\/[^\s]+/],
+  ['implicitDomainName', /^\/[^\s]+/],
   ['subResources', /^[^\s]+\//],
   ['upDir', /^(\.\.\/)+/],
   ['emptyAnchor', /^#$/]
 ];
 
 const fullUrlTypes = ['fullHTTP', 'fullHTTPS', 'HTTPnoW', 'HTTPSnoW'];
+
+export const externalUrlTypes = [
+  'fullHTTP',
+  'fullHTTPS',
+  'HTTPnoW',
+  'HTTPSnoW',
+  'implicitProto'
+];
+
+export const isExternalUrl = (url: string): boolean => {
+  const type = urlTyper(url);
+  return externalUrlTypes.includes(type);
+};
+
+export const filterExternalUrls = (
+  urls: pageFun.urlFound[]
+): pageFun.urlFound[] => {
+  return urls.filter((urlFound) => !isExternalUrl(urlFound.url));
+};
 
 export const regexMatchCount = (
   inputString: string,
