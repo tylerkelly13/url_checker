@@ -1,70 +1,106 @@
-import { exit } from 'process';
-import * as http from './http.js';
-import * as pageFun from './contentFunctions.js';
+import * as http from './http';
+import * as pageFun from './contentFunctions';
 
 /*
  * https://developer.mozilla.org/en-US/docs/Web/API/URL/URL
  * https://developer.mozilla.org/en-US/docs/Web/API/URL
  */
 
-interface results {
-  parentURL: string,
-  status: string,
-  statusMsg: string,
-  url: string,
-  elem: string,
-  anchored: boolean,
-  anchorExists?: boolean
+export type results = {
+  parentURL: string;
+  status: string;
+  statusMsg: string;
+  url: string;
+  elem: string;
+  anchored: boolean;
+  anchorExists?: boolean;
+  line?: number;
+  column?: number;
 };
 
-interface protocolCheck {
-  fullUrl: string,
-  protocol: string
-}
+export const isNon2XX = (result: results): boolean => {
+  const status = parseInt(result.status, 10);
+  return status < 200 || status >= 300;
+};
 
-type urlRegex = [string, RegExp][];
+export const filterNon2XX = (results: results[]): results[] => {
+  return results.filter(isNon2XX);
+};
+
+export type protocolCheck = {
+  fullUrl: string;
+  protocol: string;
+};
+
+export type urlRegex = [string, RegExp][];
 
 const supportedProtocolRegExp = /https?/;
 
 const urlStarts: urlRegex = [
-  [ 'anchor', /^#[^\s]+/ ],
-  [ 'fullHTTP', /^http:\/\/www\./ ],
-  [ 'fullHTTPS', /^https:\/\/www\./ ],
-  [ 'HTTPnoW', /^http:\/\/(?!www\.)/ ],
-  [ 'HTTPSnoW', /^https:\/\/(?!www\.)/ ],
-  [ 'implicitDomainName', /^\/[^\s]+/ ],
-  [ 'implicitProto', /^\/\/[^\s]+/ ],
-  [ 'subResources', /^[^\s]+\// ],
-  [ 'upDir', /^(\.\.\/)+/ ],
-  [ 'emptyAnchor', /^#$/ ]
+  ['anchor', /^#[^\s]+/],
+  ['fullHTTP', /^http:\/\/www\./],
+  ['fullHTTPS', /^https:\/\/www\./],
+  ['HTTPnoW', /^http:\/\/(?!www\.)/],
+  ['HTTPSnoW', /^https:\/\/(?!www\.)/],
+  ['implicitProto', /^\/\/[^\s]+/],
+  ['implicitDomainName', /^\/[^\s]+/],
+  ['subResources', /^[^\s]+\//],
+  ['upDir', /^(\.\.\/)+/],
+  ['emptyAnchor', /^#$/]
 ];
 
-const fullUrlTypes = [ 'fullHTTP', 'fullHTTPS', 'HTTPnoW', 'HTTPSnoW' ];
+const fullUrlTypes = ['fullHTTP', 'fullHTTPS', 'HTTPnoW', 'HTTPSnoW'];
 
-function regexMatchCount (inputString: string, regexp: RegExp): number {
+export const externalUrlTypes = [
+  'fullHTTP',
+  'fullHTTPS',
+  'HTTPnoW',
+  'HTTPSnoW',
+  'implicitProto'
+];
+
+export const isExternalUrl = (url: string): boolean => {
+  const type = urlTyper(url);
+  return externalUrlTypes.includes(type);
+};
+
+export const filterExternalUrls = (
+  urls: pageFun.urlFound[]
+): pageFun.urlFound[] => {
+  return urls.filter(urlFound => !isExternalUrl(urlFound.url));
+};
+
+export const regexMatchCount = (
+  inputString: string,
+  regexp: RegExp
+): number => {
   return ((inputString || '').match(regexp) || []).length;
-}
+};
 
-function urlConstructor (parentUrl: string, url:string, urlType:string): string {
+const urlConstructor = (
+  parentUrl: string,
+  url: string,
+  urlType: string
+): string => {
   let fullURL: string;
   const parent = new URL(parentUrl);
   switch (urlType) {
-  case 'implicitDomainName':
-    fullURL = new URL(url, parent.origin).toString();
-    break;
-  case 'implicitProto':
-    fullURL = 'https:' + url;
-    break;
-  case 'subResources':
-  case 'upDir':
-  default:
-    fullURL = new URL(url, parent.href).toString();
-    break;
+    case 'implicitDomainName':
+      fullURL = new URL(url, parent.origin).toString();
+      break;
+    case 'implicitProto':
+      fullURL = 'https:' + url;
+      break;
+    case 'subResources':
+    case 'upDir':
+    default:
+      fullURL = new URL(url, parent.href).toString();
+      break;
   }
   return fullURL;
-}
+};
 
-function anchoredChecker (validUrl:string, urlType: string): string {
+export const anchoredChecker = (validUrl: string, urlType: string): string => {
   if (urlType === 'anchor') {
     return 'anchor';
   } else if (/#[^)]/.test(validUrl)) {
@@ -74,7 +110,7 @@ function anchoredChecker (validUrl:string, urlType: string): string {
   }
 };
 
-function validURLCheckFix (url:string):string {
+export const validURLCheckFix = (url: string): string => {
   /**
    * Checks if the URL is valid and complete.
    *
@@ -89,47 +125,61 @@ function validURLCheckFix (url:string):string {
     console.log('No protocol provided, trying "HTTPS"');
     return 'https://' + url;
   } else {
-    console.error('Invalid URL: ' + url + '\nAre you missing the protocol (`https://`) and/or domain (`www.example.com`)?');
+    console.error(
+      'Invalid URL: ' +
+        url +
+        '\nAre you missing the protocol (`https://`) and/or domain (`www.example.com`)?'
+    );
     return '';
   }
-}
+};
 
-function goOrNoGo (url: string): string {
+export const goOrNoGo = (url: string): string => {
   const validURL = validURLCheckFix(url);
   if (validURL === '' && validURL.length < 5) {
-    exit(1);
+    process.exit(1);
   } else {
     return url;
   }
-}
+};
 
-function whichProtocol (fullUrl: string, protoRegExp:RegExp = supportedProtocolRegExp): protocolCheck {
-  const protocol = (fullUrl.match(protoRegExp) || [ 'Unsupported' ])[0];
+export const whichProtocol = (
+  fullUrl: string,
+  protoRegExp: RegExp = supportedProtocolRegExp
+): protocolCheck => {
+  const protocol = (fullUrl.match(protoRegExp) || ['Unsupported'])[0];
   if (protocol === 'Unsupported') {
     console.log('Unable to determine the protocol for: ' + fullUrl);
-    exit(1);
+    process.exit(1);
   }
   return { fullUrl, protocol };
-}
+};
 
-function urlTyper (url: string, regexArr:urlRegex = urlStarts): string {
+export const urlTyper = (
+  url: string,
+  regexArr: urlRegex = urlStarts
+): string => {
   let urlType = '';
-  regexArr.every((pair) => {
+  regexArr.every(pair => {
     if (pair[1].test(url)) {
       urlType = pair[0];
       return false;
-    };
+    }
     return true;
   });
   return urlType;
 };
 
-async function checkAndReturn (urlFound:pageFun.urlFound, page: pageFun.pageHTML, fullUrls: string[] = fullUrlTypes): Promise<results> {
-  const { parentURL, url, elem } = urlFound;
+export const checkAndReturn = async (
+  urlFound: pageFun.urlFound,
+  page: pageFun.pageHTML,
+  fullUrls: string[] = fullUrlTypes
+): Promise<results> => {
+  const { parentURL, url, elem, line, column } = urlFound;
   // determine type
   const urlType = urlTyper(url);
   // complete URL?
-  let correctURL:string;
+  let correctURL: string;
   if (fullUrls.indexOf(urlType) < 0 && urlType !== 'anchor') {
     correctURL = urlConstructor(parentURL, url, urlType);
   } else {
@@ -142,46 +192,49 @@ async function checkAndReturn (urlFound:pageFun.urlFound, page: pageFun.pageHTML
     statusResult: http.getStatusResult,
     anchorExists: boolean;
   switch (anchoredChecker(correctURL, urlType)) {
-  case 'anchor':
-    if ((/#\w+/).test(url)) {
-      anchored = true;
-      anchorExists = page.content.querySelector(url) !== null;
-      statusMsg = 'N/A';
-      status = '000';
-    } else {
-      anchored = true;
-      anchorExists = false;
-      statusMsg = 'N/A';
-      status = '000';
-    }
-    break;
-  case 'anchored':
-    anchored = true;
-    statusResult = await http.getStatus(correctURL);
-    status = statusResult.statusCode;
-    statusMsg = statusResult.statusMsg;
-    if (parseFloat(status) >= 400) {
-      anchorExists = false;
-    } else {
-      const theAnchor = '#' + url.split('#')[1];
-      // getContent
-      const content = await Promise.resolve(http.getContent(parentURL));
-      // getSelector
-      const HTMLContent = pageFun.selectContent({ body: content.content, parentURL });
-      if ((/#\w+/).test(url)) {
-        anchorExists = HTMLContent.content.querySelector(theAnchor) !== null;
+    case 'anchor':
+      if (/#\w+/.test(url)) {
+        anchored = true;
+        anchorExists = page.content.querySelector(url) !== null;
+        statusMsg = 'N/A';
+        status = '000';
       } else {
+        anchored = true;
         anchorExists = false;
+        statusMsg = 'N/A';
+        status = '000';
       }
-    }
-    break;
-  default:
-    anchored = false;
-    anchorExists = false;
-    statusResult = await http.getStatus(correctURL);
-    status = statusResult.statusCode;
-    statusMsg = statusResult.statusMsg;
-    break;
+      break;
+    case 'anchored':
+      anchored = true;
+      statusResult = await http.getStatus(correctURL);
+      status = statusResult.statusCode;
+      statusMsg = statusResult.statusMsg;
+      if (parseFloat(status) >= 400) {
+        anchorExists = false;
+      } else {
+        const theAnchor = '#' + url.split('#')[1];
+        // getContent
+        const content = await Promise.resolve(http.getContent(parentURL));
+        // getSelector
+        const HTMLContent = pageFun.selectContent({
+          body: content.content,
+          parentURL
+        });
+        if (/#\w+/.test(url)) {
+          anchorExists = HTMLContent.content.querySelector(theAnchor) !== null;
+        } else {
+          anchorExists = false;
+        }
+      }
+      break;
+    default:
+      anchored = false;
+      anchorExists = false;
+      statusResult = await http.getStatus(correctURL);
+      status = statusResult.statusCode;
+      statusMsg = statusResult.statusMsg;
+      break;
   }
   /*
    * if anchored, getcontent, check for id
@@ -195,19 +248,8 @@ async function checkAndReturn (urlFound:pageFun.urlFound, page: pageFun.pageHTML
     url,
     elem,
     anchored,
-    anchorExists
+    anchorExists,
+    line,
+    column
   };
-}
-
-export {
-  urlRegex,
-  protocolCheck,
-  results,
-  anchoredChecker,
-  checkAndReturn,
-  goOrNoGo,
-  regexMatchCount,
-  validURLCheckFix,
-  urlTyper,
-  whichProtocol
 };

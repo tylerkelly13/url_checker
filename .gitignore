@@ -33,3 +33,7 @@ node_modules/
 url_checker_results.csv
 
 dist/
+
+# Test coverage
+coverage/
+.nyc_output/

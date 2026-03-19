@@ -1,17 +1,17 @@
 import needle from 'needle';
 
-interface getContentResult {
-  url: string,
-  content: string
-}
-
-interface getStatusResult {
-  url: string,
-  statusCode: string,
-  statusMsg: string
+export type getContentResult = {
+  url: string;
+  content: string;
 };
 
-async function getContent (url:string): Promise<getContentResult> {
+export type getStatusResult = {
+  url: string;
+  statusCode: string;
+  statusMsg: string;
+};
+
+export const getContent = async (url: string): Promise<getContentResult> => {
   /**
    * Gets the page content over HTTP. Returns the content as a string.
    *
@@ -26,9 +26,9 @@ async function getContent (url:string): Promise<getContentResult> {
       return error.message;
     });
   return { url, content };
-}
+};
 
-async function getStatus (url:string): Promise<getStatusResult> {
+export const getStatus = async (url: string): Promise<getStatusResult> => {
   /**
    * Checks the status of the URL over HTTP, returns the URL and the response status code.
    *
@@ -37,7 +37,10 @@ async function getStatus (url:string): Promise<getStatusResult> {
    */
   const { statusCode, statusMessage } = await needle('get', url)
     .then(Response => {
-      return { statusCode: Response.statusCode || '', statusMessage: Response.statusMessage };
+      return {
+        statusCode: Response.statusCode || '',
+        statusMessage: Response.statusMessage
+      };
     })
     .catch(error => {
       return {
@@ -45,12 +48,9 @@ async function getStatus (url:string): Promise<getStatusResult> {
         statusMessage: 'Request failed: ' + error
       };
     });
-  return { url, statusCode: statusCode.toString(), statusMsg: statusMessage || '' };
-}
-
-export {
-  getContentResult,
-  getStatusResult,
-  getContent,
-  getStatus
+  return {
+    url,
+    statusCode: statusCode.toString(),
+    statusMsg: statusMessage || ''
+  };
 };

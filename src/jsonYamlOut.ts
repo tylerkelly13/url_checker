@@ -1,37 +1,84 @@
-/* import yaml from 'js-yaml';
-interface restructuredResults {
-  [parentURL: string]:
-  [ URL.results ]
-};
- */
-// JS { 'https://www.example.com':
-//    [ { url: 'https://www.wtf.com',
-//        elem: 'a',
-//        status: 404,
-//        anchored: true,
-//        anchorExists: true } ] }
-// yaml
-// https://www.example.com:
-//   - url: 'https://www.wtf.com'
-//     elem: 'a'
-//     status: 404
-//     anchored: true
-//     anchorExists: true
-/*
-function dropKeyFromResults (dropkey:string, object: results):object {
-  const newOutput: resultsPerPage = {};
-  Object.keys(object).forEach(key => {
-    if (key !== dropkey) {
-      newOutput[key] = object[key];
-    }
-  });
-  return newOutput;
-}
+import yaml from 'js-yaml';
+import { writeFileSync } from 'fs';
+import * as URL from './urlFunctions';
 
-function resultsRestructure (ArrayResultsObject: results[]):restructuredResults {
-  const restructured = ArrayResultsObject.forEach(result => {
-    const parent = result.parentURL;
-    const subObject:resultsPerPage = dropKeyFromResults(parent, result);
-    return Object.fromEntries([ parent, subObject ]);
-  })
-} */
+export type resultsPerPage = {
+  url: string;
+  elem: string;
+  status: string;
+  statusMsg: string;
+  anchored: boolean;
+  anchorExists?: boolean;
+};
+
+export type restructuredResults = {
+  [parentURL: string]: resultsPerPage[];
+};
+
+export const dropKeyFromResults = (result: URL.results): resultsPerPage => {
+  /**
+   * Remove the parentURL key from a result object since it becomes the grouping key.
+   *
+   * @param result Single result object with parentURL.
+   * @return Result object without parentURL.
+   */
+  const { parentURL: _parentURL, ...rest } = result;
+  return rest;
+};
+
+export const resultsRestructure = (
+  arrayResultsObject: URL.results[]
+): restructuredResults => {
+  /**
+   * Restructure flat array of results into nested object grouped by parentURL.
+   *
+   * @param arrayResultsObject Array of result objects.
+   * @return Object with parentURLs as keys and arrays of results as values.
+   */
+  return arrayResultsObject.reduce(
+    (acc: restructuredResults, result: URL.results) => {
+      const parent = result.parentURL;
+      const subObject = dropKeyFromResults(result);
+
+      if (!acc[parent]) {
+        acc[parent] = [];
+      }
+      acc[parent].push(subObject);
+
+      return acc;
+    },
+    {}
+  );
+};
+
+export const linkCheckerJSON = async (
+  finalResults: Promise<URL.results[]>,
+  outputFileName: string
+): Promise<void> => {
+  /**
+   * Output results as JSON file.
+   *
+   * @param finalResults Promise resolving to array of results.
+   * @param outputFileName Path to output JSON file.
+   */
+  const results = await finalResults;
+  const restructured = resultsRestructure(results);
+  const jsonOutput = JSON.stringify(restructured, null, 2);
+  writeFileSync(outputFileName, jsonOutput);
+};
+
+export const linkCheckerYAML = async (
+  finalResults: Promise<URL.results[]>,
+  outputFileName: string
+): Promise<void> => {
+  /**
+   * Output results as YAML file.
+   *
+   * @param finalResults Promise resolving to array of results.
+   * @param outputFileName Path to output YAML file.
+   */
+  const results = await finalResults;
+  const restructured = resultsRestructure(results);
+  const yamlOutput = yaml.dump(restructured);
+  writeFileSync(outputFileName, yamlOutput);
+};

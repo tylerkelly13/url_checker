@@ -1,0 +1,112 @@
+= CLI url checker tool
+
+A command-line tool for checking broken links on web pages.
+
+== Usage
+
+[source,bash]
+----
+url_checker [options] <url>
+----
+
+=== Arguments
+
+url::
+  URL of the page to check (including protocol, e.g. `https://example.com`).
+  Can also be specified with `-u` flag.
+
+=== Options
+
+`-u, --url <url>`::
+  URL of the page to check (alternative to positional argument).
+
+`-s, --selector <css selector>`::
+  CSS selector for checking part of a page (e.g. `main` for the `<main>` element).
+
+`-o, --output <file>`::
+  File to output the results. Default: `url_checker_results.csv`
+
+`-f, --format <format>`::
+  Output format: `csv`, `json`, `yaml`, or `sarif`. Default: `csv`
+
+`-a, --all`::
+  Output all results. By default, only non-2XX statuses (errors, redirects) are shown.
+
+`-i, --internal`::
+  Only check internal URLs. Filters out external URLs (http/https links to other domains) and only checks internal paths, anchors, and relative URLs.
+
+`-h, --help`::
+  Display help for command.
+
+=== Examples
+
+[source,bash]
+----
+# Check a URL (positional argument)
+url_checker https://example.com
+
+# Check with options before or after the URL
+url_checker --all https://example.com -o results.json -f json
+
+# Check only the main content area
+url_checker https://example.com -s main
+
+# Output all links including successful ones
+url_checker https://example.com --all
+
+# Check only internal links (ignore external URLs)
+url_checker https://example.com --internal
+----
+
+== Output Formats
+
+=== CSV
+
+Flat comma-separated values format with all URL check results.
+
+[source,bash]
+----
+url_checker -u https://example.com -f csv -o results.csv
+----
+
+=== JSON
+
+Structured JSON format with results grouped by parent URL.
+
+[source,bash]
+----
+url_checker -u https://example.com -f json -o results.json
+----
+
+=== YAML
+
+Human-readable YAML format with results grouped by parent URL.
+
+[source,bash]
+----
+url_checker -u https://example.com -f yaml -o results.yaml
+----
+
+=== SARIF
+
+https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html[SARIF v2.1.0] format for integration with CI/CD pipelines and code scanning tools. Includes:
+
+* Line and column numbers for each URL found in the source
+* Rule definitions for different types of URL issues
+* Severity levels (error, warning, note)
+* Full artifact and invocation metadata
+
+[source,bash]
+----
+url_checker -u https://example.com -f sarif -o results.sarif
+----
+
+== Features
+
+* Checks HTTP/HTTPS links for broken URLs (404, 500, etc.)
+* Validates anchor links within pages
+* Tracks duplicate URLs on different lines
+* Supports CSS selectors to check specific page sections
+* Filter to check only internal URLs (ignore external links)
+* Multiple output formats for different use cases
+* Line-accurate reporting in SARIF format
