@@ -16,7 +16,7 @@ export const mapMaker = (
   order: string[]
 ): Map<string, string> => {
   const mapping = new Map();
-  order.forEach((item) => {
+  order.forEach(item => {
     mapping.set(item, objectIn[item].toString());
   });
   return mapping;
@@ -28,7 +28,7 @@ export const linkCheckerCSV = async (
   resultsOrder: string[] = defaultResultsOrder
 ): Promise<void> => {
   const results = await finalResults;
-  const arrayOfArrays = results.map((res) => {
+  const arrayOfArrays = results.map(res => {
     const map = mapMaker(res, resultsOrder);
     const newArray = [];
     for (const value of map.values()) {
@@ -36,7 +36,7 @@ export const linkCheckerCSV = async (
     }
     return newArray;
   });
-  const concatenator: string[] = arrayOfArrays.map((array) => {
+  const concatenator: string[] = arrayOfArrays.map(array => {
     return '"' + array.join('","') + '"\n';
   });
   writeFileSync(outPutFileName, concatenator.toString());

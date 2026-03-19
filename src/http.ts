@@ -19,10 +19,10 @@ export const getContent = async (url: string): Promise<getContentResult> => {
    * @return URL and page content.
    */
   const content = await needle('get', url)
-    .then((response) => {
+    .then(response => {
       return response.body;
     })
-    .catch((error) => {
+    .catch(error => {
       return error.message;
     });
   return { url, content };
@@ -36,13 +36,13 @@ export const getStatus = async (url: string): Promise<getStatusResult> => {
    * @return URL and status code and message.
    */
   const { statusCode, statusMessage } = await needle('get', url)
-    .then((Response) => {
+    .then(Response => {
       return {
         statusCode: Response.statusCode || '',
         statusMessage: Response.statusMessage
       };
     })
-    .catch((error) => {
+    .catch(error => {
       return {
         statusCode: 999,
         statusMessage: 'Request failed: ' + error

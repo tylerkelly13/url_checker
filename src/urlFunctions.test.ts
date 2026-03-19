@@ -35,31 +35,41 @@ describe('urlFunctions module - property-based tests', () => {
 
   describe('regexMatchCount', () => {
     it('should return non-negative integer', () => {
-      fc.assert(fc.property(fc.string(), fc.constantFrom(/a/, /\d/, /\s/), (str, regex) => {
-        const result = regexMatchCount(str, regex);
+      fc.assert(
+        fc.property(
+          fc.string(),
+          fc.constantFrom(/a/, /\d/, /\s/),
+          (str, regex) => {
+            const result = regexMatchCount(str, regex);
 
-        expect(typeof result).toBe('number');
-        expect(result).toBeGreaterThanOrEqual(0);
-        expect(Number.isInteger(result)).toBe(true);
-      }));
+            expect(typeof result).toBe('number');
+            expect(result).toBeGreaterThanOrEqual(0);
+            expect(Number.isInteger(result)).toBe(true);
+          }
+        )
+      );
     });
 
     it('should return 0 for empty string', () => {
-      fc.assert(fc.property(fc.constantFrom(/a/, /b/, /c/), (regex) => {
-        const result = regexMatchCount('', regex);
+      fc.assert(
+        fc.property(fc.constantFrom(/a/, /b/, /c/), regex => {
+          const result = regexMatchCount('', regex);
 
-        expect(result).toBe(0);
-      }));
+          expect(result).toBe(0);
+        })
+      );
     });
 
     it('should count all matches correctly for simple patterns', () => {
-      fc.assert(fc.property(fc.string(), (str) => {
-        const regex = /a/g;
-        const result = regexMatchCount(str, regex);
-        const expected = (str.match(/a/g) || []).length;
+      fc.assert(
+        fc.property(fc.string(), str => {
+          const regex = /a/g;
+          const result = regexMatchCount(str, regex);
+          const expected = (str.match(/a/g) || []).length;
 
-        expect(result).toBe(expected);
-      }));
+          expect(result).toBe(expected);
+        })
+      );
     });
 
     it('should handle null or undefined input strings', () => {
@@ -70,99 +80,121 @@ describe('urlFunctions module - property-based tests', () => {
 
   describe('validURLCheckFix', () => {
     it('should return URL unchanged if it has http:// or https:// prefix', () => {
-      fc.assert(fc.property(fc.webUrl(), (url) => {
-        const result = validURLCheckFix(url);
+      fc.assert(
+        fc.property(fc.webUrl(), url => {
+          const result = validURLCheckFix(url);
 
-        expect(result).toBe(url);
-      }));
+          expect(result).toBe(url);
+        })
+      );
     });
 
     it('should prepend https:// to www. URLs', () => {
-      fc.assert(fc.property(fc.domain(), (domain) => {
-        const url = `www.${domain}`;
-        const result = validURLCheckFix(url);
+      fc.assert(
+        fc.property(fc.domain(), domain => {
+          const url = `www.${domain}`;
+          const result = validURLCheckFix(url);
 
-        expect(result).toBe(`https://www.${domain}`);
-        expect(consoleLogSpy).toHaveBeenCalled();
-      }));
+          expect(result).toBe(`https://www.${domain}`);
+          expect(consoleLogSpy).toHaveBeenCalled();
+        })
+      );
     });
 
     it('should return empty string for invalid URLs', () => {
-      fc.assert(fc.property(
-        fc.string().filter((s) => !s.startsWith('http') && !s.startsWith('www.')),
-        (invalidUrl) => {
-          const result = validURLCheckFix(invalidUrl);
+      fc.assert(
+        fc.property(
+          fc
+            .string()
+            .filter(s => !s.startsWith('http') && !s.startsWith('www.')),
+          invalidUrl => {
+            const result = validURLCheckFix(invalidUrl);
 
-          expect(result).toBe('');
-          expect(consoleErrorSpy).toHaveBeenCalled();
-        }
-      ));
+            expect(result).toBe('');
+            expect(consoleErrorSpy).toHaveBeenCalled();
+          }
+        )
+      );
     });
 
     it('should preserve https URLs', () => {
-      fc.assert(fc.property(fc.webUrl({ validSchemes: ['https'] }), (url) => {
-        const result = validURLCheckFix(url);
+      fc.assert(
+        fc.property(fc.webUrl({ validSchemes: ['https'] }), url => {
+          const result = validURLCheckFix(url);
 
-        expect(result).toBe(url);
-      }));
+          expect(result).toBe(url);
+        })
+      );
     });
 
     it('should preserve http URLs', () => {
-      fc.assert(fc.property(fc.webUrl({ validSchemes: ['http'] }), (url) => {
-        const result = validURLCheckFix(url);
+      fc.assert(
+        fc.property(fc.webUrl({ validSchemes: ['http'] }), url => {
+          const result = validURLCheckFix(url);
 
-        expect(result).toBe(url);
-      }));
+          expect(result).toBe(url);
+        })
+      );
     });
   });
 
   describe('goOrNoGo', () => {
     it('should return URL for valid URLs', () => {
-      fc.assert(fc.property(fc.webUrl(), (url) => {
-        const result = goOrNoGo(url);
+      fc.assert(
+        fc.property(fc.webUrl(), url => {
+          const result = goOrNoGo(url);
 
-        expect(result).toBe(url);
-      }));
+          expect(result).toBe(url);
+        })
+      );
     });
 
     it('should return URL for www. domains after fix', () => {
-      fc.assert(fc.property(fc.domain(), (domain) => {
-        const url = `www.${domain}`;
-        const result = goOrNoGo(url);
+      fc.assert(
+        fc.property(fc.domain(), domain => {
+          const url = `www.${domain}`;
+          const result = goOrNoGo(url);
 
-        expect(result).toBe(url);
-      }));
+          expect(result).toBe(url);
+        })
+      );
     });
   });
 
   describe('whichProtocol', () => {
     it('should detect https protocol', () => {
-      fc.assert(fc.property(fc.webUrl({ validSchemes: ['https'] }), (url) => {
-        const result = whichProtocol(url);
+      fc.assert(
+        fc.property(fc.webUrl({ validSchemes: ['https'] }), url => {
+          const result = whichProtocol(url);
 
-        expect(result.fullUrl).toBe(url);
-        expect(result.protocol).toBe('https');
-      }));
+          expect(result.fullUrl).toBe(url);
+          expect(result.protocol).toBe('https');
+        })
+      );
     });
 
     it('should detect http protocol', () => {
-      fc.assert(fc.property(fc.webUrl({ validSchemes: ['http'] }), (url) => {
-        const result = whichProtocol(url);
+      fc.assert(
+        fc.property(fc.webUrl({ validSchemes: ['http'] }), url => {
+          const result = whichProtocol(url);
 
-        expect(result.fullUrl).toBe(url);
-        expect(result.protocol).toBe('http');
-      }));
+          expect(result.fullUrl).toBe(url);
+          expect(result.protocol).toBe('http');
+        })
+      );
     });
 
     it('should always return object with fullUrl and protocol', () => {
-      fc.assert(fc.property(fc.webUrl(), (url) => {
-        const result = whichProtocol(url);
+      fc.assert(
+        fc.property(fc.webUrl(), url => {
+          const result = whichProtocol(url);
 
-        expect(result).toHaveProperty('fullUrl');
-        expect(result).toHaveProperty('protocol');
-        expect(typeof result.fullUrl).toBe('string');
-        expect(typeof result.protocol).toBe('string');
-      }));
+          expect(result).toHaveProperty('fullUrl');
+          expect(result).toHaveProperty('protocol');
+          expect(typeof result.fullUrl).toBe('string');
+          expect(typeof result.protocol).toBe('string');
+        })
+      );
     });
 
     it('should exit for unsupported protocols', () => {
@@ -183,7 +215,7 @@ describe('urlFunctions module - property-based tests', () => {
     it('should identify anchor URLs', () => {
       const urls = ['#section', '#heading-1', '#top'];
 
-      urls.forEach((url) => {
+      urls.forEach(url => {
         const result = urlTyper(url);
         expect(result).toBe('anchor');
       });
@@ -220,7 +252,7 @@ describe('urlFunctions module - property-based tests', () => {
     it('should identify implicit domain name URLs', () => {
       const urls = ['/page', '/about/team', '/contact'];
 
-      urls.forEach((url) => {
+      urls.forEach(url => {
         const result = urlTyper(url);
         expect(result).toBe('implicitDomainName');
       });
@@ -229,7 +261,7 @@ describe('urlFunctions module - property-based tests', () => {
     it('should identify implicit protocol URLs', () => {
       const urls = ['//cdn.example.com/script.js', '//example.com/file.js'];
 
-      urls.forEach((url) => {
+      urls.forEach(url => {
         const result = urlTyper(url);
         expect(result).toBe('implicitProto');
       });
@@ -238,7 +270,7 @@ describe('urlFunctions module - property-based tests', () => {
     it('should identify sub-resource URLs', () => {
       const urls = ['images/photo.jpg', 'css/style.css', 'js/app.js'];
 
-      urls.forEach((url) => {
+      urls.forEach(url => {
         const result = urlTyper(url);
         expect(result).toBe('subResources');
       });
@@ -248,7 +280,7 @@ describe('urlFunctions module - property-based tests', () => {
       // The upDir regex is /^(\.\.\/)+/ which requires ../ pattern
       const urls = ['../page.html', '../../index.html'];
 
-      urls.forEach((url) => {
+      urls.forEach(url => {
         const result = urlTyper(url);
         // May match either upDir or subResources depending on exact implementation
         expect(['upDir', 'subResources']).toContain(result);
@@ -262,87 +294,103 @@ describe('urlFunctions module - property-based tests', () => {
     });
 
     it('should always return a string', () => {
-      fc.assert(fc.property(fc.string(), (url) => {
-        const result = urlTyper(url);
+      fc.assert(
+        fc.property(fc.string(), url => {
+          const result = urlTyper(url);
 
-        expect(typeof result).toBe('string');
-      }));
+          expect(typeof result).toBe('string');
+        })
+      );
     });
   });
 
   describe('anchoredChecker', () => {
     it('should return "anchor" for anchor URL type', () => {
-      fc.assert(fc.property(fc.webUrl(), (url) => {
-        const result = anchoredChecker(url, 'anchor');
+      fc.assert(
+        fc.property(fc.webUrl(), url => {
+          const result = anchoredChecker(url, 'anchor');
 
-        expect(result).toBe('anchor');
-      }));
+          expect(result).toBe('anchor');
+        })
+      );
     });
 
     it('should return "anchored" for URLs with hash', () => {
-      fc.assert(fc.property(fc.webUrl(), (url) => {
-        const urlWithHash = url + '#section';
-        const result = anchoredChecker(urlWithHash, 'fullHTTPS');
+      fc.assert(
+        fc.property(fc.webUrl(), url => {
+          const urlWithHash = url + '#section';
+          const result = anchoredChecker(urlWithHash, 'fullHTTPS');
 
-        expect(result).toBe('anchored');
-      }));
+          expect(result).toBe('anchored');
+        })
+      );
     });
 
     it('should return "noAnchor" for URLs without hash and not anchor type', () => {
-      fc.assert(fc.property(fc.webUrl(), (url) => {
-        const result = anchoredChecker(url, 'fullHTTPS');
+      fc.assert(
+        fc.property(fc.webUrl(), url => {
+          const result = anchoredChecker(url, 'fullHTTPS');
 
-        expect(result).toBe('noAnchor');
-      }));
+          expect(result).toBe('noAnchor');
+        })
+      );
     });
 
     it('should always return one of three values', () => {
-      fc.assert(fc.property(
-        fc.webUrl(),
-        fc.constantFrom('anchor', 'fullHTTP', 'fullHTTPS'),
-        (url, urlType) => {
-          const result = anchoredChecker(url, urlType);
+      fc.assert(
+        fc.property(
+          fc.webUrl(),
+          fc.constantFrom('anchor', 'fullHTTP', 'fullHTTPS'),
+          (url, urlType) => {
+            const result = anchoredChecker(url, urlType);
 
-          expect(['anchor', 'anchored', 'noAnchor']).toContain(result);
-        }
-      ));
+            expect(['anchor', 'anchored', 'noAnchor']).toContain(result);
+          }
+        )
+      );
     });
   });
 
   describe('Type inference properties', () => {
     it('full URLs should be typed consistently', () => {
-      fc.assert(fc.property(fc.webUrl(), (baseUrl) => {
-        const httpUrl = baseUrl.replace('https://', 'http://');
-        const httpsUrl = baseUrl.replace('http://', 'https://');
+      fc.assert(
+        fc.property(fc.webUrl(), baseUrl => {
+          const httpUrl = baseUrl.replace('https://', 'http://');
+          const httpsUrl = baseUrl.replace('http://', 'https://');
 
-        const httpType = urlTyper(httpUrl);
-        const httpsType = urlTyper(httpsUrl);
+          const httpType = urlTyper(httpUrl);
+          const httpsType = urlTyper(httpsUrl);
 
-        expect(['fullHTTP', 'HTTPnoW', 'fullHTTPS', 'HTTPSnoW']).toContain(
-          httpType
-        );
-        expect(['fullHTTP', 'HTTPnoW', 'fullHTTPS', 'HTTPSnoW']).toContain(
-          httpsType
-        );
-      }));
+          expect(['fullHTTP', 'HTTPnoW', 'fullHTTPS', 'HTTPSnoW']).toContain(
+            httpType
+          );
+          expect(['fullHTTP', 'HTTPnoW', 'fullHTTPS', 'HTTPSnoW']).toContain(
+            httpsType
+          );
+        })
+      );
     });
   });
 
   describe('URL validation properties', () => {
     it('valid URLs should pass through validURLCheckFix unchanged', () => {
-      fc.assert(fc.property(fc.webUrl(), (url) => {
-        const result = validURLCheckFix(url);
+      fc.assert(
+        fc.property(fc.webUrl(), url => {
+          const result = validURLCheckFix(url);
 
-        expect(result).toBe(url);
-      }));
+          expect(result).toBe(url);
+        })
+      );
     });
 
     it('valid URLs should pass goOrNoGo', () => {
-      fc.assert(fc.property(fc.webUrl(), (url) => {
-        const result = goOrNoGo(url);
+      fc.assert(
+        fc.property(fc.webUrl(), url => {
+          const result = goOrNoGo(url);
 
-        expect(result).toBe(url);
-      }));
+          expect(result).toBe(url);
+        })
+      );
     });
   });
 
@@ -414,7 +462,7 @@ describe('urlFunctions module - property-based tests', () => {
       const filtered = filterNon2XX(results);
 
       expect(filtered).toHaveLength(3);
-      expect(filtered.map((r) => r.status)).toEqual(['404', '301', '500']);
+      expect(filtered.map(r => r.status)).toEqual(['404', '301', '500']);
     });
 
     it('should return empty array when all are 2XX', () => {
@@ -493,7 +541,7 @@ describe('urlFunctions module - property-based tests', () => {
       const filtered = filterExternalUrls(urls);
 
       expect(filtered).toHaveLength(2);
-      expect(filtered.map((u) => u.url)).toEqual(['/internal/page', '#section']);
+      expect(filtered.map(u => u.url)).toEqual(['/internal/page', '#section']);
     });
 
     it('should return all URLs when none are external', () => {

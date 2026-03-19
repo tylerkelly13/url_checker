@@ -13,21 +13,21 @@ export const urlChecker = async (
   // getContent
   const resultsArray: Promise<URL.results>[] = await http
     .getContent(parentURL)
-    .then((parentPage) => {
+    .then(parentPage => {
       return pageFun.selectContent(
         { body: parentPage.content, parentURL: parentPage.url },
         selector
       );
     })
-    .then((parentContent) => {
+    .then(parentContent => {
       let urls = pageFun.getUrls(parentContent);
       if (internal) {
         urls = URL.filterExternalUrls(urls);
       }
       return { urls, content: parentContent };
     })
-    .then((urlsFoundInParent) => {
-      return urlsFoundInParent.urls.map(async (url) => {
+    .then(urlsFoundInParent => {
+      return urlsFoundInParent.urls.map(async url => {
         const res = await URL.checkAndReturn(url, urlsFoundInParent.content);
         return res;
       });

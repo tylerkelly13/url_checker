@@ -67,7 +67,7 @@ export const isExternalUrl = (url: string): boolean => {
 export const filterExternalUrls = (
   urls: pageFun.urlFound[]
 ): pageFun.urlFound[] => {
-  return urls.filter((urlFound) => !isExternalUrl(urlFound.url));
+  return urls.filter(urlFound => !isExternalUrl(urlFound.url));
 };
 
 export const regexMatchCount = (
@@ -160,7 +160,7 @@ export const urlTyper = (
   regexArr: urlRegex = urlStarts
 ): string => {
   let urlType = '';
-  regexArr.every((pair) => {
+  regexArr.every(pair => {
     if (pair[1].test(url)) {
       urlType = pair[0];
       return false;

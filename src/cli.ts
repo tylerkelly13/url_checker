@@ -14,7 +14,7 @@ const resultsPromise = urlChecker(
   inputs.url,
   inputs.selector,
   inputs.internal
-).then((results) => (inputs.all ? results : filterNon2XX(results)));
+).then(results => (inputs.all ? results : filterNon2XX(results)));
 
 if (inputs.format === 'csv') {
   linkCheckerCSV(resultsPromise, inputs.output);

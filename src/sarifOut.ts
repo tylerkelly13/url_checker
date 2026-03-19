@@ -201,7 +201,7 @@ export const determineRuleId = (
  */
 export const getUniqueRuleIds = (results: URL.results[]): string[] => {
   const ruleIds = new Set<string>();
-  results.forEach((result) => {
+  results.forEach(result => {
     const ruleId = determineRuleId(
       result.status,
       result.anchored,
@@ -394,11 +394,11 @@ export const convertToSarifResult = (result: URL.results): SarifResult => {
  */
 export const getArtifacts = (results: URL.results[]): SarifArtifact[] => {
   const uniqueUrls = new Set<string>();
-  results.forEach((result) => {
+  results.forEach(result => {
     uniqueUrls.add(result.parentURL);
   });
 
-  return Array.from(uniqueUrls).map((url) => ({
+  return Array.from(uniqueUrls).map(url => ({
     location: {
       uri: url
     },

@@ -8,7 +8,7 @@ const getVersionFromPackage = () => {
     const packageJson = fs.readFileSync('./package.json', 'utf-8');
     const packageData = JSON.parse(packageJson);
     return packageData.version || '0.0.0';
-  // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line no-unused-vars
   } catch (_error) {
     return '0.0.0';
   }
@@ -125,7 +125,7 @@ describe('SARIF Output Module', () => {
     it('should create all rule definitions', () => {
       const rules = sarif.createRules();
       expect(rules.length).toBe(7);
-      expect(rules.map((r) => r.id)).toEqual([
+      expect(rules.map(r => r.id)).toEqual([
         'URL001',
         'URL002',
         'URL003',
@@ -138,7 +138,7 @@ describe('SARIF Output Module', () => {
 
     it('should include required properties for each rule', () => {
       const rules = sarif.createRules();
-      rules.forEach((rule) => {
+      rules.forEach(rule => {
         expect(rule.id).toBeDefined();
         expect(rule.name).toBeDefined();
         expect(rule.shortDescription).toBeDefined();
@@ -270,10 +270,10 @@ describe('SARIF Output Module', () => {
       const artifacts = sarif.getArtifacts(results);
 
       expect(artifacts.length).toBe(2);
-      expect(artifacts.map((a) => a.location.uri)).toContain(
+      expect(artifacts.map(a => a.location.uri)).toContain(
         'https://example.com/page1'
       );
-      expect(artifacts.map((a) => a.location.uri)).toContain(
+      expect(artifacts.map(a => a.location.uri)).toContain(
         'https://example.com/page2'
       );
       expect(artifacts[0].mimeType).toBe('text/html');
@@ -423,7 +423,7 @@ describe('SARIF Output Module', () => {
       ];
 
       const sarifLog = sarif.convertToSarif(results);
-      const resultLevels = sarifLog.runs[0].results.map((r) => r.level);
+      const resultLevels = sarifLog.runs[0].results.map(r => r.level);
 
       expect(resultLevels).toContain('none'); // 200
       expect(resultLevels).toContain('error'); // 404 and missing anchor

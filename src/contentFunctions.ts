@@ -53,11 +53,11 @@ const expandAttrArrays = (
 ): elemAttrib[] => {
   /* convert  */
   const newPairArray: elemAttrib[] = [];
-  entries.forEach((strStrOrArr) => {
+  entries.forEach(strStrOrArr => {
     const elem = strStrOrArr[0];
     const strOrArr = strStrOrArr[1];
     if (Array.isArray(strOrArr)) {
-      strOrArr.forEach((el) => {
+      strOrArr.forEach(el => {
         newPairArray.push({ element: elem, attribute: el });
       });
     } else {
