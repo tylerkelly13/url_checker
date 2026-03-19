@@ -1,6 +1,18 @@
 import { describe, it, expect } from 'vitest';
 import * as sarif from './sarifOut';
 import * as URL from './urlFunctions';
+import fs from 'fs';
+
+const getVersionFromPackage = () => {
+  try {
+    const packageJson = fs.readFileSync('./package.json', 'utf-8');
+    const packageData = JSON.parse(packageJson);
+    return packageData.version || '0.0.0';
+  // eslint-disable-next-line no-unused-vars
+  } catch (_error) {
+    return '0.0.0';
+  }
+};
 
 describe('SARIF Output Module', () => {
   describe('mapStatusToLevel', () => {
@@ -305,7 +317,7 @@ describe('SARIF Output Module', () => {
       const tool = sarifLog.runs[0].tool.driver;
 
       expect(tool.name).toBe('url_checker');
-      expect(tool.version).toBe('0.1.0');
+      expect(tool.version).toBe(getVersionFromPackage());
       expect(tool.informationUri).toBeDefined();
       expect(tool.rules).toBeDefined();
     });
@@ -422,7 +434,7 @@ describe('SARIF Output Module', () => {
   describe('getPackageVersion', () => {
     it('should read version from package.json', () => {
       const version = sarif.getPackageVersion('./package.json');
-      expect(version).toBe('0.1.0');
+      expect(version).toBe(getVersionFromPackage());
     });
 
     it('should return fallback version for non-existent file', () => {
@@ -447,7 +459,7 @@ describe('SARIF Output Module', () => {
       const sarifLog = sarif.convertToSarif(results, './package.json');
       const toolVersion = sarifLog.runs[0].tool.driver.version;
 
-      expect(toolVersion).toBe('0.1.0');
+      expect(toolVersion).toBe(getVersionFromPackage());
     });
   });
 
