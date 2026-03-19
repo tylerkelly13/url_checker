@@ -1,5 +1,5 @@
-import { describe, expect, vi, beforeEach, afterEach } from 'vitest';
-import { fc, test } from '@fast-check/vitest';
+import { describe, expect, vi, beforeEach, afterEach, it } from 'vitest';
+import fc from 'fast-check';
 import { urlChecker } from './urlChecker';
 import * as URL from './urlFunctions';
 import * as pageFun from './contentFunctions';
@@ -21,9 +21,8 @@ describe('urlChecker module - property-based tests', () => {
   });
 
   describe('urlChecker function', () => {
-    test.prop([fc.webUrl({ validSchemes: ['http', 'https'] })])(
-      'should return an array of results for valid URLs',
-      async (url) => {
+    it('should return an array of results for valid URLs', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl({ validSchemes: ['http', 'https'] }), async (url) => {
         // Mock the dependencies
         vi.spyOn(URL, 'goOrNoGo').mockReturnValue(url);
         vi.spyOn(URL, 'whichProtocol').mockReturnValue({
@@ -62,12 +61,11 @@ describe('urlChecker module - property-based tests', () => {
 
         expect(Array.isArray(result)).toBe(true);
         expect(result.length).toBeGreaterThan(0);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl({ validSchemes: ['http', 'https'] }), fc.string()])(
-      'should pass selector to selectContent when provided',
-      async (url, selector) => {
+    it('should pass selector to selectContent when provided', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl({ validSchemes: ['http', 'https'] }), fc.string(), async (url, selector) => {
         vi.spyOn(URL, 'goOrNoGo').mockReturnValue(url);
         vi.spyOn(URL, 'whichProtocol').mockReturnValue({
           fullUrl: url,
@@ -94,12 +92,11 @@ describe('urlChecker module - property-based tests', () => {
           expect.objectContaining({ parentURL: url }),
           selector
         );
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl({ validSchemes: ['http', 'https'] })])(
-      'should call goOrNoGo to validate URL',
-      async (url) => {
+    it('should call goOrNoGo to validate URL', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl({ validSchemes: ['http', 'https'] }), async (url) => {
         const goOrNoGoSpy = vi.spyOn(URL, 'goOrNoGo').mockReturnValue(url);
         vi.spyOn(URL, 'whichProtocol').mockReturnValue({
           fullUrl: url,
@@ -121,12 +118,11 @@ describe('urlChecker module - property-based tests', () => {
         await urlChecker(url);
 
         expect(goOrNoGoSpy).toHaveBeenCalledWith(url);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl({ validSchemes: ['http', 'https'] })])(
-      'should call whichProtocol to determine protocol',
-      async (url) => {
+    it('should call whichProtocol to determine protocol', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl({ validSchemes: ['http', 'https'] }), async (url) => {
         vi.spyOn(URL, 'goOrNoGo').mockReturnValue(url);
         const whichProtocolSpy = vi
           .spyOn(URL, 'whichProtocol')
@@ -150,12 +146,11 @@ describe('urlChecker module - property-based tests', () => {
         await urlChecker(url);
 
         expect(whichProtocolSpy).toHaveBeenCalledWith(url);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl({ validSchemes: ['http', 'https'] })])(
-      'should fetch content using getContent',
-      async (url) => {
+    it('should fetch content using getContent', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl({ validSchemes: ['http', 'https'] }), async (url) => {
         vi.spyOn(URL, 'goOrNoGo').mockReturnValue(url);
         vi.spyOn(URL, 'whichProtocol').mockReturnValue({
           fullUrl: url,
@@ -177,12 +172,11 @@ describe('urlChecker module - property-based tests', () => {
         await urlChecker(url);
 
         expect(getContentSpy).toHaveBeenCalledWith(url);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl({ validSchemes: ['http', 'https'] })])(
-      'should extract URLs from content using getUrls',
-      async (url) => {
+    it('should extract URLs from content using getUrls', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl({ validSchemes: ['http', 'https'] }), async (url) => {
         vi.spyOn(URL, 'goOrNoGo').mockReturnValue(url);
         vi.spyOn(URL, 'whichProtocol').mockReturnValue({
           fullUrl: url,
@@ -202,62 +196,61 @@ describe('urlChecker module - property-based tests', () => {
         await urlChecker(url);
 
         expect(getUrlsSpy).toHaveBeenCalledWith(mockContent);
-      }
-    );
+      }));
+    });
 
-    test.prop([
-      fc.webUrl({ validSchemes: ['http', 'https'] }),
-      fc.array(fc.webUrl(), { minLength: 1, maxLength: 5 })
-    ])(
-      'should call checkAndReturn for each URL found',
-      async (parentUrl, foundUrls) => {
-        // Clear all mocks before this test run
-        vi.clearAllMocks();
+    it('should call checkAndReturn for each URL found', async () => {
+      await fc.assert(fc.asyncProperty(
+        fc.webUrl({ validSchemes: ['http', 'https'] }),
+        fc.array(fc.webUrl(), { minLength: 1, maxLength: 5 }),
+        async (parentUrl, foundUrls) => {
+          // Clear all mocks before this test run
+          vi.clearAllMocks();
 
-        vi.spyOn(URL, 'goOrNoGo').mockReturnValue(parentUrl);
-        vi.spyOn(URL, 'whichProtocol').mockReturnValue({
-          fullUrl: parentUrl,
-          protocol: 'https'
-        });
+          vi.spyOn(URL, 'goOrNoGo').mockReturnValue(parentUrl);
+          vi.spyOn(URL, 'whichProtocol').mockReturnValue({
+            fullUrl: parentUrl,
+            protocol: 'https'
+          });
 
-        vi.spyOn(http, 'getContent').mockResolvedValue({
-          content: '<html><body></body></html>',
-          url: parentUrl
-        });
+          vi.spyOn(http, 'getContent').mockResolvedValue({
+            content: '<html><body></body></html>',
+            url: parentUrl
+          });
 
-        const mockContent = { content: {} as any, parentURL: parentUrl };
-        vi.spyOn(pageFun, 'selectContent').mockReturnValue(mockContent);
+          const mockContent = { content: {} as any, parentURL: parentUrl };
+          vi.spyOn(pageFun, 'selectContent').mockReturnValue(mockContent);
 
-        const mockUrlsFound = foundUrls.map((url) => ({
-          url,
-          parentURL: parentUrl,
-          elem: 'a'
-        }));
-        vi.spyOn(pageFun, 'getUrls').mockReturnValue(mockUrlsFound);
-
-        const checkAndReturnSpy = vi
-          .spyOn(URL, 'checkAndReturn')
-          .mockImplementation(async (urlFound) => ({
+          const mockUrlsFound = foundUrls.map((url) => ({
+            url,
             parentURL: parentUrl,
-            url: urlFound.url,
-            status: '200',
-            statusMsg: 'OK',
-            elem: 'a',
-            anchored: false
+            elem: 'a'
           }));
+          vi.spyOn(pageFun, 'getUrls').mockReturnValue(mockUrlsFound);
 
-        await urlChecker(parentUrl);
+          const checkAndReturnSpy = vi
+            .spyOn(URL, 'checkAndReturn')
+            .mockImplementation(async (urlFound) => ({
+              parentURL: parentUrl,
+              url: urlFound.url,
+              status: '200',
+              statusMsg: 'OK',
+              elem: 'a',
+              anchored: false
+            }));
 
-        expect(checkAndReturnSpy).toHaveBeenCalledTimes(foundUrls.length);
-        mockUrlsFound.forEach((urlFound) => {
-          expect(checkAndReturnSpy).toHaveBeenCalledWith(urlFound, mockContent);
-        });
-      }
-    );
+          await urlChecker(parentUrl);
 
-    test.prop([fc.webUrl({ validSchemes: ['http', 'https'] })])(
-      'should return empty array when no URLs found in content',
-      async (url) => {
+          expect(checkAndReturnSpy).toHaveBeenCalledTimes(foundUrls.length);
+          mockUrlsFound.forEach((urlFound) => {
+            expect(checkAndReturnSpy).toHaveBeenCalledWith(urlFound, mockContent);
+          });
+        }
+      ));
+    });
+
+    it('should return empty array when no URLs found in content', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl({ validSchemes: ['http', 'https'] }), async (url) => {
         vi.spyOn(URL, 'goOrNoGo').mockReturnValue(url);
         vi.spyOn(URL, 'whichProtocol').mockReturnValue({
           fullUrl: url,
@@ -280,14 +273,13 @@ describe('urlChecker module - property-based tests', () => {
 
         expect(Array.isArray(result)).toBe(true);
         expect(result.length).toBe(0);
-      }
-    );
+      }));
+    });
   });
 
   describe('Integration properties', () => {
-    test.prop([fc.webUrl({ validSchemes: ['http', 'https'] })])(
-      'should handle the full pipeline: validate -> fetch -> select -> extract -> check',
-      async (url) => {
+    it('should handle the full pipeline: validate -> fetch -> select -> extract -> check', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl({ validSchemes: ['http', 'https'] }), async (url) => {
         const goOrNoGoSpy = vi.spyOn(URL, 'goOrNoGo').mockReturnValue(url);
         const whichProtocolSpy = vi
           .spyOn(URL, 'whichProtocol')
@@ -337,12 +329,11 @@ describe('urlChecker module - property-based tests', () => {
         for (let i = 1; i < callOrder.length; i++) {
           expect(callOrder[i]).toBeGreaterThan(callOrder[i - 1]);
         }
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl({ validSchemes: ['http', 'https'] })])(
-      'should preserve parent URL throughout the processing chain',
-      async (url) => {
+    it('should preserve parent URL throughout the processing chain', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl({ validSchemes: ['http', 'https'] }), async (url) => {
         vi.spyOn(URL, 'goOrNoGo').mockReturnValue(url);
         vi.spyOn(URL, 'whichProtocol').mockReturnValue({
           fullUrl: url,
@@ -397,12 +388,11 @@ describe('urlChecker module - property-based tests', () => {
         result.forEach((res) => {
           expect(res.parentURL).toBe(url);
         });
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl({ validSchemes: ['http', 'https'] })])(
-      'should always return results with proper structure',
-      async (url) => {
+    it('should always return results with proper structure', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl({ validSchemes: ['http', 'https'] }), async (url) => {
         vi.spyOn(URL, 'goOrNoGo').mockReturnValue(url);
         vi.spyOn(URL, 'whichProtocol').mockReturnValue({
           fullUrl: url,
@@ -444,14 +434,13 @@ describe('urlChecker module - property-based tests', () => {
           expect(res).toHaveProperty('elem');
           expect(res).toHaveProperty('anchored');
         });
-      }
-    );
+      }));
+    });
   });
 
   describe('Error handling properties', () => {
-    test.prop([fc.webUrl({ validSchemes: ['http', 'https'] })])(
-      'should handle getContent failures gracefully',
-      async (url) => {
+    it('should handle getContent failures gracefully', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl({ validSchemes: ['http', 'https'] }), async (url) => {
         vi.spyOn(URL, 'goOrNoGo').mockReturnValue(url);
         vi.spyOn(URL, 'whichProtocol').mockReturnValue({
           fullUrl: url,
@@ -463,25 +452,23 @@ describe('urlChecker module - property-based tests', () => {
         );
 
         await expect(urlChecker(url)).rejects.toThrow();
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl({ validSchemes: ['http', 'https'] })])(
-      'should propagate validation errors from goOrNoGo',
-      async (url) => {
+    it('should propagate validation errors from goOrNoGo', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl({ validSchemes: ['http', 'https'] }), async (url) => {
         vi.spyOn(URL, 'goOrNoGo').mockImplementation(() => {
           throw new Error('Invalid URL');
         });
 
         await expect(urlChecker(url)).rejects.toThrow('Invalid URL');
-      }
-    );
+      }));
+    });
   });
 
   describe('Selector behavior', () => {
-    test.prop([fc.webUrl({ validSchemes: ['http', 'https'] })])(
-      'should use undefined selector by default',
-      async (url) => {
+    it('should use undefined selector by default', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl({ validSchemes: ['http', 'https'] }), async (url) => {
         vi.spyOn(URL, 'goOrNoGo').mockReturnValue(url);
         vi.spyOn(URL, 'whichProtocol').mockReturnValue({
           fullUrl: url,
@@ -508,42 +495,42 @@ describe('urlChecker module - property-based tests', () => {
           expect.anything(),
           undefined
         );
-      }
-    );
+      }));
+    });
 
-    test.prop([
-      fc.webUrl({ validSchemes: ['http', 'https'] }),
-      fc.constantFrom('main', 'article', 'section', '#content')
-    ])(
-      'should pass custom selector to selectContent',
-      async (url, selector) => {
-        vi.spyOn(URL, 'goOrNoGo').mockReturnValue(url);
-        vi.spyOn(URL, 'whichProtocol').mockReturnValue({
-          fullUrl: url,
-          protocol: 'https'
-        });
-
-        vi.spyOn(http, 'getContent').mockResolvedValue({
-          content: '<html><body></body></html>',
-          url: url
-        });
-
-        const selectContentSpy = vi
-          .spyOn(pageFun, 'selectContent')
-          .mockReturnValue({
-            content: {} as any,
-            parentURL: url
+    it('should pass custom selector to selectContent', async () => {
+      await fc.assert(fc.asyncProperty(
+        fc.webUrl({ validSchemes: ['http', 'https'] }),
+        fc.constantFrom('main', 'article', 'section', '#content'),
+        async (url, selector) => {
+          vi.spyOn(URL, 'goOrNoGo').mockReturnValue(url);
+          vi.spyOn(URL, 'whichProtocol').mockReturnValue({
+            fullUrl: url,
+            protocol: 'https'
           });
 
-        vi.spyOn(pageFun, 'getUrls').mockReturnValue([]);
+          vi.spyOn(http, 'getContent').mockResolvedValue({
+            content: '<html><body></body></html>',
+            url: url
+          });
 
-        await urlChecker(url, selector);
+          const selectContentSpy = vi
+            .spyOn(pageFun, 'selectContent')
+            .mockReturnValue({
+              content: {} as any,
+              parentURL: url
+            });
 
-        expect(selectContentSpy).toHaveBeenCalledWith(
-          expect.anything(),
-          selector
-        );
-      }
-    );
+          vi.spyOn(pageFun, 'getUrls').mockReturnValue([]);
+
+          await urlChecker(url, selector);
+
+          expect(selectContentSpy).toHaveBeenCalledWith(
+            expect.anything(),
+            selector
+          );
+        }
+      ));
+    });
   });
 });

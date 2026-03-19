@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fc, test } from '@fast-check/vitest';
+import fc from 'fast-check';
 import {
   getUrls,
   selectContent,
@@ -10,87 +10,84 @@ import {
 
 describe('contentFunctions module - property-based tests', () => {
   describe('selectContent', () => {
-    test.prop([fc.webUrl(), fc.string()])(
-      'should always return an object with content and parentURL',
-      (url, body) => {
+    it('should always return an object with content and parentURL', () => {
+      fc.assert(fc.property(fc.webUrl(), fc.string(), (url, body) => {
         const result = selectContent({ body, parentURL: url });
 
         expect(result).toHaveProperty('content');
         expect(result).toHaveProperty('parentURL');
         expect(result.parentURL).toBe(url);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl()])(
-      'should return body element when selector is undefined',
-      (url) => {
+    it('should return body element when selector is undefined', () => {
+      fc.assert(fc.property(fc.webUrl(), (url) => {
         const body = '<html><body><h1>Test</h1></body></html>';
         const result = selectContent({ body, parentURL: url }, undefined);
 
         expect(result.content.nodeName).toBe('BODY');
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl()])(
-      'should return body element when selector is null',
-      (url) => {
+    it('should return body element when selector is null', () => {
+      fc.assert(fc.property(fc.webUrl(), (url) => {
         const body = '<html><body><h1>Test</h1></body></html>';
         const result = selectContent({ body, parentURL: url }, null as any);
 
         expect(result.content.nodeName).toBe('BODY');
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl()])(
-      'should return body element when selector is empty string',
-      (url) => {
+    it('should return body element when selector is empty string', () => {
+      fc.assert(fc.property(fc.webUrl(), (url) => {
         const body = '<html><body><h1>Test</h1></body></html>';
         const result = selectContent({ body, parentURL: url }, '');
 
         expect(result.content.nodeName).toBe('BODY');
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl()])(
-      'should select specific element when valid selector provided',
-      (url) => {
+    it('should select specific element when valid selector provided', () => {
+      fc.assert(fc.property(fc.webUrl(), (url) => {
         const body =
           '<html><body><main id="content"><h1>Test</h1></main></body></html>';
         const result = selectContent({ body, parentURL: url }, 'main');
 
         expect(result.content.nodeName).toBe('MAIN');
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl()])(
-      'should fallback to body when selector does not match',
-      (url) => {
+    it('should fallback to body when selector does not match', () => {
+      fc.assert(fc.property(fc.webUrl(), (url) => {
         const body = '<html><body><h1>Test</h1></body></html>';
         const result = selectContent({ body, parentURL: url }, '#nonexistent');
 
         expect(result.content.nodeName).toBe('BODY');
-      }
-    );
-
-    test.prop([fc.webUrl()])('should handle empty HTML body', (url) => {
-      const result = selectContent({ body: '', parentURL: url });
-
-      expect(result.content.nodeName).toBe('BODY');
-      expect(result.parentURL).toBe(url);
+      }));
     });
 
-    test.prop([fc.webUrl()])('should preserve parentURL in result', (url) => {
-      const body = '<html><body>test</body></html>';
-      const result = selectContent({ body, parentURL: url });
+    it('should handle empty HTML body', () => {
+      fc.assert(fc.property(fc.webUrl(), (url) => {
+        const result = selectContent({ body: '', parentURL: url });
 
-      expect(result.parentURL).toBe(url);
+        expect(result.content.nodeName).toBe('BODY');
+        expect(result.parentURL).toBe(url);
+      }));
+    });
+
+    it('should preserve parentURL in result', () => {
+      fc.assert(fc.property(fc.webUrl(), (url) => {
+        const body = '<html><body>test</body></html>';
+        const result = selectContent({ body, parentURL: url });
+
+        expect(result.parentURL).toBe(url);
+      }));
     });
   });
 
   describe('getUrls', () => {
-    test.prop([fc.webUrl()])(
-      'should return empty array when no URLs in content',
-      (url) => {
+    it('should return empty array when no URLs in content', () => {
+      fc.assert(fc.property(fc.webUrl(), (url) => {
         const body = '<html><body><p>No links here</p></body></html>';
         const content = selectContent({ body, parentURL: url });
 
@@ -98,12 +95,11 @@ describe('contentFunctions module - property-based tests', () => {
 
         expect(Array.isArray(result)).toBe(true);
         expect(result.length).toBe(0);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl(), fc.webUrl()])(
-      'should find anchor href attributes',
-      (parentURL, linkURL) => {
+    it('should find anchor href attributes', () => {
+      fc.assert(fc.property(fc.webUrl(), fc.webUrl(), (parentURL, linkURL) => {
         const body = `<html><body><a href="${linkURL}">Link</a></body></html>`;
         const content = selectContent({ body, parentURL });
 
@@ -113,12 +109,11 @@ describe('contentFunctions module - property-based tests', () => {
         expect(result[0].url).toBe(linkURL);
         expect(result[0].elem).toBe('a');
         expect(result[0].parentURL).toBe(parentURL);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl(), fc.webUrl()])(
-      'should find img src attributes',
-      (parentURL, imgURL) => {
+    it('should find img src attributes', () => {
+      fc.assert(fc.property(fc.webUrl(), fc.webUrl(), (parentURL, imgURL) => {
         const body = `<html><body><img src="${imgURL}" alt="test"/></body></html>`;
         const content = selectContent({ body, parentURL });
 
@@ -127,12 +122,11 @@ describe('contentFunctions module - property-based tests', () => {
         expect(result.length).toBeGreaterThan(0);
         expect(result[0].url).toBe(imgURL);
         expect(result[0].elem).toBe('img');
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl(), fc.webUrl()])(
-      'should find script src attributes',
-      (parentURL, scriptURL) => {
+    it('should find script src attributes', () => {
+      fc.assert(fc.property(fc.webUrl(), fc.webUrl(), (parentURL, scriptURL) => {
         const body = `<html><body><script src="${scriptURL}"></script></body></html>`;
         const content = selectContent({ body, parentURL });
 
@@ -141,12 +135,11 @@ describe('contentFunctions module - property-based tests', () => {
         expect(
           result.some((r) => r.url === scriptURL && r.elem === 'script')
         ).toBe(true);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl(), fc.webUrl(), fc.webUrl()])(
-      'should find multiple URLs in content',
-      (parentURL, url1, url2) => {
+    it('should find multiple URLs in content', () => {
+      fc.assert(fc.property(fc.webUrl(), fc.webUrl(), fc.webUrl(), (parentURL, url1, url2) => {
         const body = `<html><body><a href="${url1}">Link1</a><a href="${url2}">Link2</a></body></html>`;
         const content = selectContent({ body, parentURL });
 
@@ -155,12 +148,11 @@ describe('contentFunctions module - property-based tests', () => {
         expect(result.length).toBe(2);
         expect(result.some((r) => r.url === url1)).toBe(true);
         expect(result.some((r) => r.url === url2)).toBe(true);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl()])(
-      'should return urlFound objects with correct structure',
-      (parentURL) => {
+    it('should return urlFound objects with correct structure', () => {
+      fc.assert(fc.property(fc.webUrl(), (parentURL) => {
         const body =
           '<html><body><a href="https://example.com">Link</a></body></html>';
         const content = selectContent({ body, parentURL });
@@ -176,12 +168,11 @@ describe('contentFunctions module - property-based tests', () => {
           expect(typeof urlFound.url).toBe('string');
           expect(typeof urlFound.elem).toBe('string');
         });
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl()])(
-      'should handle elements with no URL attributes',
-      (parentURL) => {
+    it('should handle elements with no URL attributes', () => {
+      fc.assert(fc.property(fc.webUrl(), (parentURL) => {
         const body =
           '<html><body><a>No href</a><img alt="no src"/></body></html>';
         const content = selectContent({ body, parentURL });
@@ -190,12 +181,11 @@ describe('contentFunctions module - property-based tests', () => {
 
         expect(Array.isArray(result)).toBe(true);
         expect(result.length).toBe(0);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl(), fc.string()])(
-      'should preserve parentURL in all results',
-      (parentURL, linkURL) => {
+    it('should preserve parentURL in all results', () => {
+      fc.assert(fc.property(fc.webUrl(), fc.string(), (parentURL, linkURL) => {
         const body = `<html><body><a href="${linkURL}">Link</a></body></html>`;
         const content = selectContent({ body, parentURL });
 
@@ -204,12 +194,11 @@ describe('contentFunctions module - property-based tests', () => {
         result.forEach((urlFound) => {
           expect(urlFound.parentURL).toBe(parentURL);
         });
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl()])(
-      'should handle custom element-attribute pairs',
-      (parentURL) => {
+    it('should handle custom element-attribute pairs', () => {
+      fc.assert(fc.property(fc.webUrl(), (parentURL) => {
         const body =
           '<html><body><a href="https://example.com">Link</a></body></html>';
         const content = selectContent({ body, parentURL });
@@ -219,17 +208,17 @@ describe('contentFunctions module - property-based tests', () => {
 
         expect(result.length).toBe(1);
         expect(result[0].elem).toBe('a');
-      }
-    );
+      }));
+    });
   });
 
   describe('elemUrlPairs', () => {
-    test('should be an array of element-attribute pairs', () => {
+    it('should be an array of element-attribute pairs', () => {
       expect(Array.isArray(elemUrlPairs)).toBe(true);
       expect(elemUrlPairs.length).toBeGreaterThan(0);
     });
 
-    test('should contain objects with element and attribute properties', () => {
+    it('should contain objects with element and attribute properties', () => {
       elemUrlPairs.forEach((pair) => {
         expect(pair).toHaveProperty('element');
         expect(pair).toHaveProperty('attribute');
@@ -238,7 +227,7 @@ describe('contentFunctions module - property-based tests', () => {
       });
     });
 
-    test('should expand array attributes correctly', () => {
+    it('should expand array attributes correctly', () => {
       const imgPairs = elemUrlPairs.filter((pair) => pair.element === 'img');
       expect(imgPairs.length).toBeGreaterThan(1);
       expect(imgPairs.some((p) => p.attribute === 'src')).toBe(true);
@@ -247,9 +236,8 @@ describe('contentFunctions module - property-based tests', () => {
   });
 
   describe('Integration properties', () => {
-    test.prop([fc.webUrl()])(
-      'selectContent -> getUrls should compose correctly',
-      (parentURL) => {
+    it('selectContent -> getUrls should compose correctly', () => {
+      fc.assert(fc.property(fc.webUrl(), (parentURL) => {
         const body =
           '<html><body><a href="https://example.com">Test</a></body></html>';
         const selected = selectContent({ body, parentURL });
@@ -257,12 +245,11 @@ describe('contentFunctions module - property-based tests', () => {
 
         expect(urls.length).toBeGreaterThan(0);
         expect(urls[0].parentURL).toBe(parentURL);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl(), fc.constantFrom('main', 'article', 'section')])(
-      'getUrls should respect selector scope',
-      (parentURL, selector) => {
+    it('getUrls should respect selector scope', () => {
+      fc.assert(fc.property(fc.webUrl(), fc.constantFrom('main', 'article', 'section'), (parentURL, selector) => {
         const body = `
           <html>
             <body>
@@ -276,8 +263,8 @@ describe('contentFunctions module - property-based tests', () => {
 
         expect(urls.length).toBe(1);
         expect(urls[0].url).toBe('https://inside.com');
-      }
-    );
+      }));
+    });
   });
 
   describe('findLineColumn', () => {

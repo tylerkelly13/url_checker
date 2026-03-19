@@ -1,5 +1,5 @@
-import { describe, expect, vi, afterEach } from 'vitest';
-import { fc, test } from '@fast-check/vitest';
+import { describe, expect, vi, afterEach, it } from 'vitest';
+import fc from 'fast-check';
 import {
   dropKeyFromResults,
   resultsRestructure,
@@ -18,9 +18,8 @@ describe('jsonYamlOut module - property-based tests', () => {
   });
 
   describe('dropKeyFromResults', () => {
-    test.prop([fc.webUrl(), fc.webUrl()])(
-      'should remove parentURL from result object',
-      (parentURL, url) => {
+    it('should remove parentURL from result object', () => {
+      fc.assert(fc.property(fc.webUrl(), fc.webUrl(), (parentURL, url) => {
         const result: results = {
           parentURL,
           url,
@@ -39,33 +38,35 @@ describe('jsonYamlOut module - property-based tests', () => {
         expect(dropped).toHaveProperty('statusMsg');
         expect(dropped).toHaveProperty('elem');
         expect(dropped).toHaveProperty('anchored');
-      }
-    );
-
-    test.prop([
-      fc.record({
-        parentURL: fc.webUrl(),
-        url: fc.webUrl(),
-        status: fc.string(),
-        statusMsg: fc.string(),
-        elem: fc.constantFrom('a', 'img', 'script', 'link'),
-        anchored: fc.boolean(),
-        anchorExists: fc.boolean()
-      })
-    ])('should preserve all other properties', (result) => {
-      const dropped = dropKeyFromResults(result);
-
-      expect(dropped.url).toBe(result.url);
-      expect(dropped.status).toBe(result.status);
-      expect(dropped.statusMsg).toBe(result.statusMsg);
-      expect(dropped.elem).toBe(result.elem);
-      expect(dropped.anchored).toBe(result.anchored);
-      expect(dropped.anchorExists).toBe(result.anchorExists);
+      }));
     });
 
-    test.prop([fc.webUrl()])(
-      'should handle optional anchorExists property',
-      (url) => {
+    it('should preserve all other properties', () => {
+      fc.assert(fc.property(
+        fc.record({
+          parentURL: fc.webUrl(),
+          url: fc.webUrl(),
+          status: fc.string(),
+          statusMsg: fc.string(),
+          elem: fc.constantFrom('a', 'img', 'script', 'link'),
+          anchored: fc.boolean(),
+          anchorExists: fc.boolean()
+        }),
+        (result) => {
+          const dropped = dropKeyFromResults(result);
+
+          expect(dropped.url).toBe(result.url);
+          expect(dropped.status).toBe(result.status);
+          expect(dropped.statusMsg).toBe(result.statusMsg);
+          expect(dropped.elem).toBe(result.elem);
+          expect(dropped.anchored).toBe(result.anchored);
+          expect(dropped.anchorExists).toBe(result.anchorExists);
+        }
+      ));
+    });
+
+    it('should handle optional anchorExists property', () => {
+      fc.assert(fc.property(fc.webUrl(), (url) => {
         const resultWithAnchor: results = {
           parentURL: url,
           url: url,
@@ -90,14 +91,13 @@ describe('jsonYamlOut module - property-based tests', () => {
 
         expect(dropped1.anchorExists).toBe(true);
         expect(dropped2.anchorExists).toBeUndefined();
-      }
-    );
+      }));
+    });
   });
 
   describe('resultsRestructure', () => {
-    test.prop([fc.webUrl(), fc.webUrl()])(
-      'should group results by parentURL',
-      (parentURL, url) => {
+    it('should group results by parentURL', () => {
+      fc.assert(fc.property(fc.webUrl(), fc.webUrl(), (parentURL, url) => {
         const results: results[] = [
           {
             parentURL,
@@ -115,12 +115,11 @@ describe('jsonYamlOut module - property-based tests', () => {
         expect(restructured).toHaveProperty(parentURL);
         expect(Array.isArray(restructured[parentURL])).toBe(true);
         expect(restructured[parentURL].length).toBe(1);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl(), fc.webUrl(), fc.webUrl()])(
-      'should group multiple results with same parentURL',
-      (parentURL, url1, url2) => {
+    it('should group multiple results with same parentURL', () => {
+      fc.assert(fc.property(fc.webUrl(), fc.webUrl(), fc.webUrl(), (parentURL, url1, url2) => {
         const results: results[] = [
           {
             parentURL,
@@ -145,12 +144,11 @@ describe('jsonYamlOut module - property-based tests', () => {
         expect(restructured[parentURL].length).toBe(2);
         expect(restructured[parentURL][0].url).toBe(url1);
         expect(restructured[parentURL][1].url).toBe(url2);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl(), fc.webUrl(), fc.webUrl(), fc.webUrl()])(
-      'should create separate keys for different parentURLs',
-      (parent1, parent2, url1, url2) => {
+    it('should create separate keys for different parentURLs', () => {
+      fc.assert(fc.property(fc.webUrl(), fc.webUrl(), fc.webUrl(), fc.webUrl(), (parent1, parent2, url1, url2) => {
         fc.pre(parent1 !== parent2);
 
         const results: results[] = [
@@ -177,69 +175,71 @@ describe('jsonYamlOut module - property-based tests', () => {
         expect(Object.keys(restructured).length).toBe(2);
         expect(restructured).toHaveProperty(parent1);
         expect(restructured).toHaveProperty(parent2);
-      }
-    );
+      }));
+    });
 
-    test('should handle empty array', () => {
+    it('should handle empty array', () => {
       const results: results[] = [];
       const restructured = resultsRestructure(results);
 
       expect(Object.keys(restructured).length).toBe(0);
     });
 
-    test.prop([
-      fc.array(
-        fc.record({
-          parentURL: fc.webUrl(),
-          url: fc.webUrl(),
-          status: fc.integer({ min: 100, max: 599 }).map(String),
-          statusMsg: fc.string(),
-          elem: fc.constantFrom('a', 'img', 'script', 'link'),
-          anchored: fc.boolean(),
-          anchorExists: fc.boolean()
-        }),
-        { minLength: 1, maxLength: 10 }
-      )
-    ])('should not lose any results during restructuring', (results) => {
-      const restructured = resultsRestructure(results);
-      const totalResults = Object.values(restructured).reduce(
-        (sum, arr) => sum + arr.length,
-        0
-      );
+    it('should not lose any results during restructuring', () => {
+      fc.assert(fc.property(
+        fc.array(
+          fc.record({
+            parentURL: fc.webUrl(),
+            url: fc.webUrl(),
+            status: fc.integer({ min: 100, max: 599 }).map(String),
+            statusMsg: fc.string(),
+            elem: fc.constantFrom('a', 'img', 'script', 'link'),
+            anchored: fc.boolean(),
+            anchorExists: fc.boolean()
+          }),
+          { minLength: 1, maxLength: 10 }
+        ),
+        (results) => {
+          const restructured = resultsRestructure(results);
+          const totalResults = Object.values(restructured).reduce(
+            (sum, arr) => sum + arr.length,
+            0
+          );
 
-      expect(totalResults).toBe(results.length);
+          expect(totalResults).toBe(results.length);
+        }
+      ));
     });
 
-    test.prop([
-      fc.webUrl(),
-      fc.array(fc.webUrl(), { minLength: 1, maxLength: 5 })
-    ])(
-      'should preserve result data in restructured format',
-      (parentURL, urls) => {
-        const results: results[] = urls.map((url) => ({
-          parentURL,
-          url,
-          status: '200',
-          statusMsg: 'OK',
-          elem: 'a',
-          anchored: false
-        }));
+    it('should preserve result data in restructured format', () => {
+      fc.assert(fc.property(
+        fc.webUrl(),
+        fc.array(fc.webUrl(), { minLength: 1, maxLength: 5 }),
+        (parentURL, urls) => {
+          const results: results[] = urls.map((url) => ({
+            parentURL,
+            url,
+            status: '200',
+            statusMsg: 'OK',
+            elem: 'a',
+            anchored: false
+          }));
 
-        const restructured = resultsRestructure(results);
+          const restructured = resultsRestructure(results);
 
-        restructured[parentURL].forEach((result, index) => {
-          expect(result.url).toBe(urls[index]);
-          expect(result.status).toBe('200');
-          expect(result.elem).toBe('a');
-        });
-      }
-    );
+          restructured[parentURL].forEach((result, index) => {
+            expect(result.url).toBe(urls[index]);
+            expect(result.status).toBe('200');
+            expect(result.elem).toBe('a');
+          });
+        }
+      ));
+    });
   });
 
   describe('linkCheckerJSON', () => {
-    test.prop([fc.webUrl(), fc.webUrl()])(
-      'should write valid JSON to file',
-      async (parentURL, url) => {
+    it('should write valid JSON to file', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), fc.webUrl(), async (parentURL, url) => {
         const results: results[] = [
           {
             parentURL,
@@ -259,12 +259,11 @@ describe('jsonYamlOut module - property-based tests', () => {
 
         // Should be valid JSON
         expect(() => JSON.parse(jsonContent)).not.toThrow();
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl()])(
-      'should format JSON with proper structure',
-      async (parentURL) => {
+    it('should format JSON with proper structure', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), async (parentURL) => {
         const results: results[] = [
           {
             parentURL,
@@ -286,12 +285,11 @@ describe('jsonYamlOut module - property-based tests', () => {
         const keys = Object.keys(parsed);
         expect(keys.length).toBeGreaterThan(0);
         expect(Array.isArray(parsed[keys[0]])).toBe(true);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl(), fc.string()])(
-      'should use provided filename',
-      async (parentURL, filename) => {
+    it('should use provided filename', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), fc.string(), async (parentURL, filename) => {
         const results: results[] = [
           {
             parentURL,
@@ -309,10 +307,10 @@ describe('jsonYamlOut module - property-based tests', () => {
           filename,
           expect.any(String)
         );
-      }
-    );
+      }));
+    });
 
-    test('should handle empty results', async () => {
+    it('should handle empty results', async () => {
       const results: results[] = [];
 
       await linkCheckerJSON(Promise.resolve(results), 'output.json');
@@ -325,9 +323,8 @@ describe('jsonYamlOut module - property-based tests', () => {
   });
 
   describe('linkCheckerYAML', () => {
-    test.prop([fc.webUrl(), fc.webUrl()])(
-      'should write valid YAML to file',
-      async (parentURL, url) => {
+    it('should write valid YAML to file', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), fc.webUrl(), async (parentURL, url) => {
         const results: results[] = [
           {
             parentURL,
@@ -347,12 +344,11 @@ describe('jsonYamlOut module - property-based tests', () => {
 
         // Should be valid YAML
         expect(() => yaml.load(yamlContent)).not.toThrow();
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl()])(
-      'should format YAML with proper structure',
-      async (parentURL) => {
+    it('should format YAML with proper structure', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), async (parentURL) => {
         const results: results[] = [
           {
             parentURL,
@@ -374,12 +370,11 @@ describe('jsonYamlOut module - property-based tests', () => {
         const keys = Object.keys(parsed);
         expect(keys.length).toBeGreaterThan(0);
         expect(Array.isArray(parsed[keys[0]])).toBe(true);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl(), fc.string()])(
-      'should use provided filename',
-      async (parentURL, filename) => {
+    it('should use provided filename', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), fc.string(), async (parentURL, filename) => {
         const results: results[] = [
           {
             parentURL,
@@ -397,10 +392,10 @@ describe('jsonYamlOut module - property-based tests', () => {
           filename,
           expect.any(String)
         );
-      }
-    );
+      }));
+    });
 
-    test('should handle empty results', async () => {
+    it('should handle empty results', async () => {
       const results: results[] = [];
 
       await linkCheckerYAML(Promise.resolve(results), 'output.yaml');
@@ -413,33 +408,33 @@ describe('jsonYamlOut module - property-based tests', () => {
   });
 
   describe('JSON and YAML equivalence', () => {
-    test.prop([
-      fc.array(
-        fc.record({
-          parentURL: fc.webUrl(),
-          url: fc.webUrl(),
-          status: fc.string(),
-          statusMsg: fc.string(),
-          elem: fc.string(),
-          anchored: fc.boolean(),
-          anchorExists: fc.boolean()
-        }),
-        { minLength: 1, maxLength: 5 }
-      )
-    ])(
-      'JSON and YAML should produce equivalent data structures',
-      async (results) => {
-        await linkCheckerJSON(Promise.resolve(results), 'output.json');
-        await linkCheckerYAML(Promise.resolve(results), 'output.yaml');
+    it('JSON and YAML should produce equivalent data structures', async () => {
+      await fc.assert(fc.asyncProperty(
+        fc.array(
+          fc.record({
+            parentURL: fc.webUrl(),
+            url: fc.webUrl(),
+            status: fc.string(),
+            statusMsg: fc.string(),
+            elem: fc.string(),
+            anchored: fc.boolean(),
+            anchorExists: fc.boolean()
+          }),
+          { minLength: 1, maxLength: 5 }
+        ),
+        async (results) => {
+          await linkCheckerJSON(Promise.resolve(results), 'output.json');
+          await linkCheckerYAML(Promise.resolve(results), 'output.yaml');
 
-        const jsonCall = vi.mocked(writeFileSync).mock.calls[0];
-        const yamlCall = vi.mocked(writeFileSync).mock.calls[1];
+          const jsonCall = vi.mocked(writeFileSync).mock.calls[0];
+          const yamlCall = vi.mocked(writeFileSync).mock.calls[1];
 
-        const jsonParsed = JSON.parse(jsonCall[1] as string);
-        const yamlParsed = yaml.load(yamlCall[1] as string);
+          const jsonParsed = JSON.parse(jsonCall[1] as string);
+          const yamlParsed = yaml.load(yamlCall[1] as string);
 
-        expect(jsonParsed).toEqual(yamlParsed);
-      }
-    );
+          expect(jsonParsed).toEqual(yamlParsed);
+        }
+      ));
+    });
   });
 });

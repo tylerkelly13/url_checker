@@ -30,9 +30,6 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.0.3)
-      '@fast-check/vitest':
-        specifier: ^0.3.0
-        version: 0.3.0(vitest@4.1.0(@types/node@25.5.0)(jsdom@29.0.0)(vite@7.3.1(@types/node@25.5.0)(tsx@4.21.0)(yaml@2.8.2)))
       '@types/js-yaml':
         specifier: ^4.0.4
         version: 4.0.9
@@ -503,11 +500,6 @@ packages:
     peerDependenciesMeta:
       '@noble/hashes':
         optional: true
-
-  '@fast-check/vitest@0.3.0':
-    resolution: {integrity: sha512-mXxAu7DJtzwSUeOMecZibq/403b8uX1/dWWXXCBgb+j9ERWuN9Hvr6usId+9ivdQ+tJl8H6o+CMv71BmjaENRQ==}
-    peerDependencies:
-      vitest: ^1 || ^2 || ^3 || ^4
 
   '@gerrit0/mini-shiki@3.23.0':
     resolution: {integrity: sha512-bEMORlG0cqdjVyCEuU0cDQbORWX+kYCeo0kV1lbxF5bt4r7SID2l9bqsxJEM0zndaxpOUT7riCyIVEuqq/Ynxg==}
@@ -2264,11 +2256,6 @@ snapshots:
       levn: 0.4.1
 
   '@exodus/bytes@1.15.0': {}
-
-  '@fast-check/vitest@0.3.0(vitest@4.1.0(@types/node@25.5.0)(jsdom@29.0.0)(vite@7.3.1(@types/node@25.5.0)(tsx@4.21.0)(yaml@2.8.2)))':
-    dependencies:
-      fast-check: 4.6.0
-      vitest: 4.1.0(@types/node@25.5.0)(jsdom@29.0.0)(vite@7.3.1(@types/node@25.5.0)(tsx@4.21.0)(yaml@2.8.2))
 
   '@gerrit0/mini-shiki@3.23.0':
     dependencies:

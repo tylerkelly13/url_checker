@@ -1,5 +1,5 @@
-import { describe, expect, vi, beforeEach, afterEach } from 'vitest';
-import { fc, test } from '@fast-check/vitest';
+import { describe, expect, vi, beforeEach, afterEach, it } from 'vitest';
+import fc from 'fast-check';
 import * as http from './http.js';
 import needle from 'needle';
 
@@ -15,9 +15,8 @@ describe('http module - property-based tests', () => {
   });
 
   describe('getContent', () => {
-    test.prop([fc.webUrl()])(
-      'should always return an object with url and content properties',
-      async (url) => {
+    it('should always return an object with url and content properties', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), async (url) => {
         const mockResponse = { body: '<html>test content</html>' };
         vi.mocked(needle).mockResolvedValue(mockResponse as any);
 
@@ -26,24 +25,22 @@ describe('http module - property-based tests', () => {
         expect(result).toHaveProperty('url');
         expect(result).toHaveProperty('content');
         expect(result.url).toBe(url);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl()])(
-      'should preserve the URL in the result',
-      async (url) => {
+    it('should preserve the URL in the result', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), async (url) => {
         const mockResponse = { body: 'any content' };
         vi.mocked(needle).mockResolvedValue(mockResponse as any);
 
         const result = await http.getContent(url);
 
         expect(result.url).toBe(url);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl(), fc.string()])(
-      'should return the response body as content on success',
-      async (url, bodyContent) => {
+    it('should return the response body as content on success', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), fc.string(), async (url, bodyContent) => {
         const mockResponse = { body: bodyContent };
         vi.mocked(needle).mockResolvedValue(mockResponse as any);
 
@@ -51,12 +48,11 @@ describe('http module - property-based tests', () => {
 
         expect(result.content).toBe(bodyContent);
         expect(vi.mocked(needle)).toHaveBeenCalledWith('get', url);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl(), fc.string()])(
-      'should return error message as content on failure',
-      async (url, errorMessage) => {
+    it('should return error message as content on failure', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), fc.string(), async (url, errorMessage) => {
         const error = new Error(errorMessage);
         vi.mocked(needle).mockRejectedValue(error);
 
@@ -64,12 +60,11 @@ describe('http module - property-based tests', () => {
 
         expect(result.url).toBe(url);
         expect(result.content).toBe(errorMessage);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl()])(
-      'should handle empty response body',
-      async (url) => {
+    it('should handle empty response body', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), async (url) => {
         const mockResponse = { body: '' };
         vi.mocked(needle).mockResolvedValue(mockResponse as any);
 
@@ -77,14 +72,13 @@ describe('http module - property-based tests', () => {
 
         expect(result.content).toBe('');
         expect(result.url).toBe(url);
-      }
-    );
+      }));
+    });
   });
 
   describe('getStatus', () => {
-    test.prop([fc.webUrl()])(
-      'should always return an object with url, statusCode, and statusMsg properties',
-      async (url) => {
+    it('should always return an object with url, statusCode, and statusMsg properties', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), async (url) => {
         const mockResponse = { statusCode: 200, statusMessage: 'OK' };
         vi.mocked(needle).mockResolvedValue(mockResponse as any);
 
@@ -94,24 +88,22 @@ describe('http module - property-based tests', () => {
         expect(result).toHaveProperty('statusCode');
         expect(result).toHaveProperty('statusMsg');
         expect(result.url).toBe(url);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl()])(
-      'should preserve the URL in the result',
-      async (url) => {
+    it('should preserve the URL in the result', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), async (url) => {
         const mockResponse = { statusCode: 200, statusMessage: 'OK' };
         vi.mocked(needle).mockResolvedValue(mockResponse as any);
 
         const result = await http.getStatus(url);
 
         expect(result.url).toBe(url);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl(), fc.integer({ min: 100, max: 599 }), fc.string()])(
-      'should convert status code to string for valid HTTP status codes',
-      async (url, statusCode, statusMessage) => {
+    it('should convert status code to string for valid HTTP status codes', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), fc.integer({ min: 100, max: 599 }), fc.string(), async (url, statusCode, statusMessage) => {
         const mockResponse = { statusCode, statusMessage };
         vi.mocked(needle).mockResolvedValue(mockResponse as any);
 
@@ -120,12 +112,11 @@ describe('http module - property-based tests', () => {
         expect(result.statusCode).toBe(statusCode.toString());
         expect(result.statusMsg).toBe(statusMessage);
         expect(vi.mocked(needle)).toHaveBeenCalledWith('get', url);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl(), fc.string()])(
-      'should return 999 status code and error message on request failure',
-      async (url, errorMessage) => {
+    it('should return 999 status code and error message on request failure', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), fc.string(), async (url, errorMessage) => {
         const error = new Error(errorMessage);
         vi.mocked(needle).mockRejectedValue(error);
 
@@ -135,38 +126,35 @@ describe('http module - property-based tests', () => {
         expect(result.statusCode).toBe('999');
         expect(result.statusMsg).toContain('Request failed:');
         expect(result.statusMsg).toContain(errorMessage);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl()])(
-      'should handle missing statusMessage gracefully',
-      async (url) => {
+    it('should handle missing statusMessage gracefully', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), async (url) => {
         const mockResponse = { statusCode: 200 };
         vi.mocked(needle).mockResolvedValue(mockResponse as any);
 
         const result = await http.getStatus(url);
 
         expect(result.statusMsg).toBe('');
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl()])(
-      'should handle missing statusCode by using empty string',
-      async (url) => {
+    it('should handle missing statusCode by using empty string', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), async (url) => {
         const mockResponse = { statusMessage: 'OK' };
         vi.mocked(needle).mockResolvedValue(mockResponse as any);
 
         const result = await http.getStatus(url);
 
         expect(result.statusCode).toBe('');
-      }
-    );
+      }));
+    });
   });
 
   describe('Interface contracts', () => {
-    test.prop([fc.webUrl()])(
-      'getContent result should match getContentResult interface',
-      async (url) => {
+    it('getContent result should match getContentResult interface', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), async (url) => {
         const mockResponse = { body: 'test' };
         vi.mocked(needle).mockResolvedValue(mockResponse as any);
 
@@ -176,12 +164,11 @@ describe('http module - property-based tests', () => {
         const typedResult: http.getContentResult = result;
         expect(typeof typedResult.url).toBe('string');
         expect(typeof typedResult.content).toBe('string');
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl()])(
-      'getStatus result should match getStatusResult interface',
-      async (url) => {
+    it('getStatus result should match getStatusResult interface', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), async (url) => {
         const mockResponse = { statusCode: 200, statusMessage: 'OK' };
         vi.mocked(needle).mockResolvedValue(mockResponse as any);
 
@@ -192,14 +179,13 @@ describe('http module - property-based tests', () => {
         expect(typeof typedResult.url).toBe('string');
         expect(typeof typedResult.statusCode).toBe('string');
         expect(typeof typedResult.statusMsg).toBe('string');
-      }
-    );
+      }));
+    });
   });
 
   describe('Idempotency properties', () => {
-    test.prop([fc.webUrl()])(
-      'getContent should produce consistent results for the same URL',
-      async (url) => {
+    it('getContent should produce consistent results for the same URL', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), async (url) => {
         const mockResponse = { body: 'consistent content' };
         vi.mocked(needle).mockResolvedValue(mockResponse as any);
 
@@ -208,12 +194,11 @@ describe('http module - property-based tests', () => {
         const result2 = await http.getContent(url);
 
         expect(result1).toEqual(result2);
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl()])(
-      'getStatus should produce consistent results for the same URL',
-      async (url) => {
+    it('getStatus should produce consistent results for the same URL', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), async (url) => {
         const mockResponse = { statusCode: 200, statusMessage: 'OK' };
         vi.mocked(needle).mockResolvedValue(mockResponse as any);
 
@@ -222,40 +207,37 @@ describe('http module - property-based tests', () => {
         const result2 = await http.getStatus(url);
 
         expect(result1).toEqual(result2);
-      }
-    );
+      }));
+    });
   });
 
   describe('Error handling properties', () => {
-    test.prop([fc.webUrl(), fc.oneof(fc.string(), fc.constant(undefined))])(
-      'getContent should never throw, always return a result',
-      async (url, errorMsg) => {
+    it('getContent should never throw, always return a result', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), fc.oneof(fc.string(), fc.constant(undefined)), async (url, errorMsg) => {
         const error = errorMsg ? new Error(errorMsg) : new Error();
         vi.mocked(needle).mockRejectedValue(error);
 
         await expect(http.getContent(url)).resolves.toBeDefined();
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl(), fc.oneof(fc.string(), fc.constant(undefined))])(
-      'getStatus should never throw, always return a result',
-      async (url, errorMsg) => {
+    it('getStatus should never throw, always return a result', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), fc.oneof(fc.string(), fc.constant(undefined)), async (url, errorMsg) => {
         const error = errorMsg ? new Error(errorMsg) : new Error();
         vi.mocked(needle).mockRejectedValue(error);
 
         await expect(http.getStatus(url)).resolves.toBeDefined();
-      }
-    );
+      }));
+    });
 
-    test.prop([fc.webUrl()])(
-      'getStatus error responses should always have status code 999',
-      async (url) => {
+    it('getStatus error responses should always have status code 999', async () => {
+      await fc.assert(fc.asyncProperty(fc.webUrl(), async (url) => {
         vi.mocked(needle).mockRejectedValue(new Error('Network error'));
 
         const result = await http.getStatus(url);
 
         expect(result.statusCode).toBe('999');
-      }
-    );
+      }));
+    });
   });
 });

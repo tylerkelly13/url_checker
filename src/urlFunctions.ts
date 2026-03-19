@@ -1,4 +1,3 @@
-import { exit } from 'process';
 import * as http from './http';
 import * as pageFun from './contentFunctions';
 
@@ -138,7 +137,7 @@ export const validURLCheckFix = (url: string): string => {
 export const goOrNoGo = (url: string): string => {
   const validURL = validURLCheckFix(url);
   if (validURL === '' && validURL.length < 5) {
-    exit(1);
+    process.exit(1);
   } else {
     return url;
   }
@@ -151,7 +150,7 @@ export const whichProtocol = (
   const protocol = (fullUrl.match(protoRegExp) || ['Unsupported'])[0];
   if (protocol === 'Unsupported') {
     console.log('Unable to determine the protocol for: ' + fullUrl);
-    exit(1);
+    process.exit(1);
   }
   return { fullUrl, protocol };
 };
