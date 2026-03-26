@@ -3,7 +3,7 @@
   "author": "Tyler Kelly",
   "version": "0.2.0",
   "description": "Tool for checking all the links on a page, or a portion of it.",
-  "license": "GPL-3",
+  "license": "GPL-3.0-only",
   "main": "src/cli.ts",
   "type": "module",
   "bin": "./dist/cli.js",
