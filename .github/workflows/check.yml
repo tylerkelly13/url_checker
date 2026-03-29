@@ -20,6 +20,8 @@ jobs:
     strategy:
       matrix:
         node-version: [24.x]
+    permissions:
+      contents: read
     uses: tylerkelly13/.github/.github/workflows/node-run-checks.yml@main
     with:
       node-version: ${{ matrix.node-version }}
