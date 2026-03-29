@@ -7,7 +7,6 @@
   "main": "src/cli.ts",
   "type": "module",
   "bin": "./dist/cli.js",
-  "packageManager": "pnpm@10",
   "scripts": {
     "url_checker": "tsx ./src/cli.ts",
     "apis": "typedoc",
