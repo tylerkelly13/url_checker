@@ -61,7 +61,7 @@
     "globals": "^17.4.0",
     "prettier": "^3.8.1",
     "tsx": "^4.21.0",
-    "typedoc": "^0.28.17"
+    "typedoc": "^0.28.18"
   },
   "engines": {
     "node": ">=10.0"
