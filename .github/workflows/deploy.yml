@@ -10,9 +10,7 @@ jobs:
   Build-check-and-deploy:
     permissions:
       contents: read
-    strategy:
-      matrix:
-        node-version: [24.x]
-    with:
-      node-version: ${{ matrix.node-version }}
     uses: tylerkelly13/.github/.github/workflows/node-check-an-deploy.yml@main
+    with:
+      node-version: "24.x"
+      pnpm-version: "latest"
