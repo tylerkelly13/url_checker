@@ -12,4 +12,4 @@ jobs:
         node-version: [24.x]
     with:
       node-version: ${{ matrix.node-version }}
-    uses: tylerkelly13/.github/.github/workflows/nodejs-check-an-deploy.yml@main
+    uses: tylerkelly13/.github/.github/workflows/node-check-an-deploy.yml@main
