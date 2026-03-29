@@ -1,7 +1,7 @@
 {
   "name": "url_checker",
   "author": "Tyler Kelly",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Tool for checking all the links on a page, or a portion of it.",
   "license": "GPL-3.0-only",
   "main": "src/cli.ts",
