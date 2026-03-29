@@ -1,0 +1,15 @@
+name: Deploy
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  Build-check-and-deploy:
+    strategy:
+      matrix:
+        node-version: [24.x]
+    with:
+      node-version: ${{ matrix.node-version }}
+    uses: tylerkelly13/.github/.github/workflows/nodejs-check-an-deploy.yml@main

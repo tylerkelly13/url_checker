@@ -19,7 +19,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "bump": "pnpm version --message 'chore: bump version to %s'"
   },
   "typedocOptions": {
     "entryPoints": [
