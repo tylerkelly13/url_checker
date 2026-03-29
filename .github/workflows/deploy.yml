@@ -9,7 +9,7 @@ on:
 jobs:
   Build-check-and-deploy:
     permissions:
-      contents: read
+      contents: write
     uses: tylerkelly13/.github/.github/workflows/node-check-an-deploy.yml@main
     with:
       node-version: "24.x"
