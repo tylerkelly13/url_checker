@@ -1,5 +1,5 @@
 name: Checks
-description: Run checks on pull requests and pushes to main and release branches.
+description: Run checks on push and on pull requests to the main and release branches.
 
 on:
   workflow_dispatch:
