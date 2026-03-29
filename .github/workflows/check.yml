@@ -1,0 +1,26 @@
+name: Check
+
+on:
+  pull_request:
+    branches:
+      - main
+      - release/*
+    paths-ignore:
+      - '**.md'
+      - '**.adoc'
+      - '**/dependabot.yml'
+  push:
+    paths-ignore:
+      - '**.md'
+      - '**.adoc'
+      - '**/dependabot.yml'
+
+jobs:
+  Build_and_check:
+    strategy:
+      matrix:
+        node-version: [24.x]
+    uses: tylerkelly13/.github/.github/workflows/nodejs-run-checks.yml@main
+    with:
+      node-version: ${{ matrix.node-version }}
+  
