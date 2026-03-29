@@ -7,10 +7,16 @@ on:
       - v*
 
 jobs:
-  Build-check-and-deploy:
-    permissions:
-      contents: write
-    uses: tylerkelly13/.github/.github/workflows/node-check-an-deploy.yml@main
+  Checks:
+    uses: tylerkelly13/.github/.github/workflows/node-run-checks.yml@main
     with:
       node-version: "24.x"
       pnpm-version: "latest"
+
+  Release:
+    needs: [Checks]
+    permissions:
+      contents: write
+    uses: tylerkelly13/.github/.github/workflows/node-gh-release.yml@main
+    with:
+      artifact-id: ${{ needs.Checks.outputs.artifact-id }}
