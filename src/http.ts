@@ -1,5 +1,6 @@
 import needle from 'needle';
 
+/** Result of fetching page content over HTTP. */
 export type getContentResult = {
   url: string;
   content: string;
@@ -11,13 +12,13 @@ export type getStatusResult = {
   statusMsg: string;
 };
 
+/**
+ * Get the page content over HTTP.
+ *
+ * @param url URL of the page to get.
+ * @returns URL and page content.
+ */
 export const getContent = async (url: string): Promise<getContentResult> => {
-  /**
-   * Gets the page content over HTTP. Returns the content as a string.
-   *
-   * @param url URL of the page to get.
-   * @return URL and page content.
-   */
   const content = await needle('get', url)
     .then(response => {
       return response.body;
@@ -28,13 +29,13 @@ export const getContent = async (url: string): Promise<getContentResult> => {
   return { url, content };
 };
 
+/**
+ * Check the status of the URL over HTTP.
+ *
+ * @param url URL to check.
+ * @returns URL, status code, and message.
+ */
 export const getStatus = async (url: string): Promise<getStatusResult> => {
-  /**
-   * Checks the status of the URL over HTTP, returns the URL and the response status code.
-   *
-   * @param url URL to be checked.
-   * @return URL and status code and message.
-   */
   const { statusCode, statusMessage } = await needle('get', url)
     .then(Response => {
       return {

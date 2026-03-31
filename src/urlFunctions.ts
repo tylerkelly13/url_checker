@@ -110,13 +110,13 @@ export const anchoredChecker = (validUrl: string, urlType: string): string => {
   }
 };
 
+/**
+ * Check if the URL is valid and complete.
+ *
+ * @param url Input URL for validation.
+ * @returns The validated URL, or an empty string if the URL is invalid.
+ */
 export const validURLCheckFix = (url: string): string => {
-  /**
-   * Checks if the URL is valid and complete.
-   *
-   * @param url Input URL for validation.
-   * @returns Valid URL if possible.
-   */
   const fullURLPrefixCheck = /^https?:\/\//;
   const checkForW3NoProtocol = /^www\./;
   if (fullURLPrefixCheck.test(url)) {
