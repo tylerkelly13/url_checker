@@ -6,7 +6,10 @@ import fs from 'fs';
 
 const sarifSchema = JSON.parse(
   fs.readFileSync(
-    new globalThis.URL('./test-fixtures/sarif-schema-2.1.0.json', import.meta.url),
+    new globalThis.URL(
+      './test-fixtures/sarif-schema-2.1.0.json',
+      import.meta.url
+    ),
     'utf-8'
   )
 );
