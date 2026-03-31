@@ -1,7 +1,15 @@
 import { describe, it, expect } from 'vitest';
+import Ajv2020 from 'ajv-draft-04';
 import * as sarif from './sarifOut';
 import * as URL from './urlFunctions';
 import fs from 'fs';
+
+const sarifSchema = JSON.parse(
+  fs.readFileSync(
+    new globalThis.URL('./test-fixtures/sarif-schema-2.1.0.json', import.meta.url),
+    'utf-8'
+  )
+);
 
 const getVersionFromPackage = () => {
   try {
@@ -520,6 +528,93 @@ describe('SARIF Output Module', () => {
 
       expect(sarifResult.properties?.line).toBe(15);
       expect(sarifResult.properties?.column).toBe(5);
+    });
+  });
+
+  describe('SARIF schema validation', () => {
+    const ajv = new Ajv2020({ strict: false });
+    const validate = ajv.compile(sarifSchema);
+
+    it('should produce output valid against the official SARIF 2.1.0 schema', () => {
+      const results: URL.results[] = [
+        {
+          parentURL: 'https://example.com',
+          url: 'https://example.com/page',
+          status: '200',
+          statusMsg: 'OK',
+          elem: 'a',
+          anchored: false
+        },
+        {
+          parentURL: 'https://example.com',
+          url: 'https://example.com/missing',
+          status: '404',
+          statusMsg: 'Not Found',
+          elem: 'a',
+          anchored: false
+        },
+        {
+          parentURL: 'https://example.com',
+          url: 'https://example.com/redirect',
+          status: '301',
+          statusMsg: 'Moved Permanently',
+          elem: 'a',
+          anchored: false
+        },
+        {
+          parentURL: 'https://example.com',
+          url: '#missing',
+          status: '000',
+          statusMsg: 'N/A',
+          elem: 'a',
+          anchored: true,
+          anchorExists: false
+        }
+      ];
+
+      const sarifLog = sarif.convertToSarif(results);
+      const valid = validate(sarifLog);
+
+      if (!valid) {
+        console.error('SARIF validation errors:', validate.errors);
+      }
+
+      expect(valid).toBe(true);
+    });
+
+    it('should produce valid SARIF with line numbers', () => {
+      const results: URL.results[] = [
+        {
+          parentURL: 'https://example.com',
+          url: 'https://example.com/page',
+          status: '200',
+          statusMsg: 'OK',
+          elem: 'a',
+          anchored: false,
+          line: 42,
+          column: 10
+        }
+      ];
+
+      const sarifLog = sarif.convertToSarif(results);
+      const valid = validate(sarifLog);
+
+      if (!valid) {
+        console.error('SARIF validation errors:', validate.errors);
+      }
+
+      expect(valid).toBe(true);
+    });
+
+    it('should produce valid SARIF with empty results', () => {
+      const sarifLog = sarif.convertToSarif([]);
+      const valid = validate(sarifLog);
+
+      if (!valid) {
+        console.error('SARIF validation errors:', validate.errors);
+      }
+
+      expect(valid).toBe(true);
     });
   });
 });
