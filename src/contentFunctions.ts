@@ -96,19 +96,17 @@ export const findLineColumn = (
   return { line, column };
 };
 
+/**
+ * Extract URLs from parsed HTML content.
+ *
+ * @param page Parsed HTML page with content, parent URL, and optional source HTML.
+ * @param urlElm HTML element-attribute pairs to scan for URLs.
+ * @returns Array of found URLs with parent URL, element name, and optional position.
+ */
 export const getUrls = (
   { content, parentURL, sourceHTML }: pageHTML,
   urlElm = elemUrlPairs
 ): urlFound[] => {
-  /**
-   * Takes in HTML and URL, finds elements with URLs, returns URLS.
-   *
-   * @param content HTML Element, such as `&gt;main&lt;` to scanned for URI-containing elements.
-   * @param parentURL URL of the original content.
-   * @param sourceHTML Optional source HTML for line number calculation.
-   * @param urlElm HTML tags and attributes to check for in the content.
-   * @returns Array of objects, with URI found, HTML tag, parentURL, and optionally line/column.
-   */
   const urls: urlFound[] = [];
   const seenUrls = new Map<string, number>();
 
@@ -150,18 +148,18 @@ export const getUrls = (
   return urls;
 };
 
+/**
+ * Convert page content from a string to a JSDOM element.
+ * Return the HTML element matching the selector, or the full body if no selector is provided.
+ *
+ * @param page Page content with body string and parent URL.
+ * @param selector CSS selector of the HTML element to analyse.
+ * @returns The selected HTML content, the parent URL, and the source HTML.
+ */
 export const selectContent = (
   { body: page, parentURL: url }: pageContent,
   selector?: string
 ): pageHTML => {
-  /**
-   * Convert page content from a string to a JSDOM element, return the HTML element matching the selector (if provided).
-   *
-   * @param body page content as a string.
-   * @param parentURL URL of page content.
-   * @param selector [CSS selector](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors) of the HTML element to analyse.
-   * @returns The page or selector HTML, the parent URL, and the source HTML.
-   */
   const { document } = new JSDOM(page).window;
   let selectedContent;
   if (selector !== undefined && selector !== null && selector !== '') {

@@ -1,6 +1,25 @@
 = CLI url checker tool
 
-A command-line tool for checking broken links on web pages.
+A command-line tool for checking broken links on web pages, for developers and technical writers maintaining websites.
+
+== Getting started
+
+=== Prerequisites
+
+* Node.js >= 10.0
+* pnpm
+
+=== Installation
+
+[source,bash]
+----
+# Install dependencies and build
+pnpm install
+pnpm build
+
+# Or install from npm
+npm install -g url_checker
+----
 
 == Usage
 
@@ -12,7 +31,7 @@ url_checker [options] <url>
 === Arguments
 
 url::
-  URL of the page to check (including protocol, e.g. `https://example.com`).
+  URL of the page to check (including protocol, such as `https://example.com`).
   Can also be specified with `-u` flag.
 
 === Options
@@ -21,7 +40,7 @@ url::
   URL of the page to check (alternative to positional argument).
 
 `-s, --selector <css selector>`::
-  CSS selector for checking part of a page (e.g. `main` for the `<main>` element).
+  CSS selector for checking part of a page (such as `main` for the `<main>` element).
 
 `-o, --output <file>`::
   File to output the results. Default: `url_checker_results.csv`
@@ -58,7 +77,7 @@ url_checker https://example.com --all
 url_checker https://example.com --internal
 ----
 
-== Output Formats
+== Output formats
 
 === CSV
 
@@ -103,10 +122,14 @@ url_checker -u https://example.com -f sarif -o results.sarif
 
 == Features
 
-* Checks HTTP/HTTPS links for broken URLs (404, 500, etc.)
+* Checks HTTP/HTTPS links for broken URLs (such as 404 and 500)
 * Validates anchor links within pages
 * Tracks duplicate URLs on different lines
 * Supports CSS selectors to check specific page sections
 * Filter to check only internal URLs (ignore external links)
 * Multiple output formats for different use cases
 * Line-accurate reporting in SARIF format
+
+== Licence
+
+This project is licensed under the GPL-3.0-only licence. See the link:LICENSE[LICENSE] file for details.

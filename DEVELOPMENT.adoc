@@ -94,7 +94,8 @@ url_checker/
 ├── eslint.config.js        # ESLint configuration
 ├── tsconfig.json           # TypeScript configuration
 ├── package.json            # Project metadata and scripts
-└── README.adoc             # User documentation
+├── README.adoc             # User documentation
+└── DEVELOPMENT.adoc        # Developer guide
 ----
 
 == Commands
@@ -238,4 +239,4 @@ pnpm build
 
 === URL check hangs or times out
 
-Some URLs may have slow response times or block automated requests. The tool does not currently have configurable timeouts. Consider using the `-s` selector option to limit the scope of checked URLs.
+Some URLs may have slow response times or block automated requests. The tool does not have configurable timeouts. Consider using the `-s` selector option to limit the scope of checked URLs.
