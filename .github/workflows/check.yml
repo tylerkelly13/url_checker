@@ -18,6 +18,7 @@ jobs:
   Build_and_check:
     permissions:
       contents: read
+      actions: write # required for artifact upload in reusable workflow
     uses: tylerkelly13/.github/.github/workflows/node-run-checks.yml@main
     with:
       node-version: "24.x"
