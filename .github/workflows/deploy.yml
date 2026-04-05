@@ -16,7 +16,7 @@ jobs:
   Release:
     needs: [Checks]
     permissions:
-      contents: write
+      contents: write  # required to create GitHub releases
     uses: tylerkelly13/.github/.github/workflows/node-gh-release.yml@main
     with:
       artifact-id: ${{ needs.Checks.outputs.artifact-id }}

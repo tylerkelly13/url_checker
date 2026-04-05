@@ -1,0 +1,42 @@
+flowchart TD
+    subgraph checks["check.yml — PR Checks"]
+        A1["Triggers:\nworkflow_dispatch\npull_request (main, release/*)"]
+        A1 --> A2["Job: Build_and_check\n(contents: read)"]
+        A2 --> RC["node-run-checks.yml\n(node: 24.x, pnpm: latest)"]
+    end
+
+    subgraph deploy["deploy.yml — Deploy"]
+        B1["Trigger:\npush tag v*"]
+        B1 --> B2["Job: Checks"]
+        B2 --> RC2["node-run-checks.yml\n(node: 24.x, pnpm: latest)"]
+        RC2 --> B3["Job: Release\n(needs: Checks)"]
+        B3 --> GHR["node-gh-release.yml\n(artifact-id from Checks)"]
+    end
+
+    subgraph run_checks["node-run-checks.yml (reusable)\nconcurrency: deploy, cancel-in-progress"]
+        direction TB
+        RCB["Build\n(node-build.yml)"]
+        RCL["Linting\n(node-lint.yml)"]
+        RCF["Formatting\n(node-formatting.yml)"]
+        RCT["Tests\n(node-test.yml)"]
+    end
+
+    subgraph node_build["node-build.yml steps"]
+        S1["node-setup:\ncheckout + pnpm + Node.js + install"]
+        S2["pnpm build"]
+        S3["pnpm pack → artifacts/"]
+        S4["sha256sum → checksums"]
+        S5["Upload artifacts\n→ artifact-id"]
+        S1 --> S2 --> S3 --> S4 --> S5
+    end
+
+    subgraph gh_release["node-gh-release.yml steps"]
+        R1["Download artifact\n(actions/download-artifact)"]
+        R2["GitHub Release (draft)\n*.tgz + checksums\n(softprops/action-gh-release)"]
+        R1 --> R2
+    end
+
+    RC --> run_checks
+    RC2 --> run_checks
+    RCB --> node_build
+    GHR --> gh_release
