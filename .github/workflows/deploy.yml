@@ -6,8 +6,13 @@ on:
     tags:
       - v*
 
+permissions: {}
+
 jobs:
   Checks:
+    permissions:
+      contents: read
+      actions: write # required for artifact upload in reusable workflow
     uses: tylerkelly13/.github/.github/workflows/node-run-checks.yml@main
     with:
       node-version: "24.x"
@@ -16,7 +21,7 @@ jobs:
   Release:
     needs: [Checks]
     permissions:
-      contents: write  # required to create GitHub releases
+      contents: write # required to create GitHub releases
     uses: tylerkelly13/.github/.github/workflows/node-gh-release.yml@main
     with:
       artifact-id: ${{ needs.Checks.outputs.artifact-id }}
