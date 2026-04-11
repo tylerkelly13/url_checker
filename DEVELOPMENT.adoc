@@ -223,64 +223,31 @@ describe('myFunction', () => {
 
 == CI/CD Pipeline
 
-The project uses reusable GitHub Actions workflows from `tylerkelly13/.github`.
+The project uses reusable GitHub Actions workflows from the https://github.com/tylerkelly13/.github[tylerkelly13/.github] repository. See https://github.com/tylerkelly13/.github/blob/main/.github/WORKFLOWS.adoc[WORKFLOWS.adoc] for internal details of the reusable workflows.
 
 image::.github/workflows/ci-cd-pipeline.svg[CI/CD Pipeline]
 
+.Mermaid source
 [%collapsible]
-.Raw Mermaid diagram source
 ====
 [source,mermaid]
 ----
-flowchart TD
-    subgraph checks["check.yml — PR Checks"]
-        A1["Triggers:\nworkflow_dispatch\npull_request (main, release/*)"]
-        A1 --> A2["Job: Build_and_check\n(contents: read)"]
-        A2 --> RC["node-run-checks.yml\n(node: 24.x, pnpm: latest)"]
+graph LR
+    subgraph checks["check.yml — PR / manual"]
+        A1["pull_request / workflow_dispatch"] --> A2["node-run-checks.yml\n(node: 24.x, pnpm: latest)"]
     end
 
-    subgraph deploy["deploy.yml — Deploy"]
-        B1["Trigger:\npush tag v*"]
-        B1 --> B2["Job: Checks"]
-        B2 --> RC2["node-run-checks.yml\n(node: 24.x, pnpm: latest)"]
-        RC2 --> B3["Job: Release\n(needs: Checks)"]
-        B3 --> GHR["node-gh-release.yml\n(artifact-id from Checks)"]
+    subgraph deploy["deploy.yml — tag push"]
+        B1["push tag v*"] --> B2["node-run-checks.yml\n(node: 24.x, pnpm: latest)"]
+        B2 -->|"artifact-id"| B3["node-gh-release.yml"]
     end
-
-    subgraph run_checks["node-run-checks.yml (reusable)\nconcurrency: deploy, cancel-in-progress"]
-        direction TB
-        RCB["Build\n(node-build.yml)"]
-        RCL["Linting\n(node-lint.yml)"]
-        RCF["Formatting\n(node-formatting.yml)"]
-        RCT["Tests\n(node-test.yml)"]
-    end
-
-    subgraph node_build["node-build.yml steps"]
-        S1["node-setup:\ncheckout + pnpm + Node.js + install"]
-        S2["pnpm build"]
-        S3["pnpm pack → artifacts/"]
-        S4["sha256sum → checksums"]
-        S5["Upload artifacts\n→ artifact-id"]
-        S1 --> S2 --> S3 --> S4 --> S5
-    end
-
-    subgraph gh_release["node-gh-release.yml steps"]
-        R1["Download artifact\n(actions/download-artifact)"]
-        R2["GitHub Release (draft)\n*.tgz + checksums\n(softprops/action-gh-release)"]
-        R1 --> R2
-    end
-
-    RC --> run_checks
-    RC2 --> run_checks
-    RCB --> node_build
-    GHR --> gh_release
 ----
 ====
 
 === Workflow summary
 
-* **check.yml** — runs on PRs to `main`/`release/*` and manual dispatch. Calls `node-run-checks.yml` with Node 24.x and pnpm latest. Four parallel jobs: Build, Linting, Formatting, Tests.
-* **deploy.yml** — runs on `v*` tag push. Runs the same checks, then creates a draft GitHub Release with `.tgz` packages and checksums.
+* **check.yml** — Runs on pull requests to `main` and `release/*` branches, and on manual dispatch. Calls `node-run-checks` with Node 24.x and pnpm latest. Ignores documentation changes.
+* **deploy.yml** — Triggers on `v*` tag pushes. Calls `node-run-checks` first, then passes the build artifact to `node-gh-release` to create a draft GitHub release.
 
 == Troubleshooting
 
