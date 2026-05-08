@@ -71,8 +71,5 @@
   },
   "engines": {
     "node": ">=10.0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": ["esbuild"]
   }
 }
