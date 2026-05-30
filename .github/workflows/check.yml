@@ -21,7 +21,7 @@ jobs:
     permissions:
       contents: read
       actions: write # required for artifact upload in reusable workflow
-    uses: tylerkelly13/.github/.github/workflows/node-run-checks.yml@main
+    uses: tylerkelly13/.github/.github/workflows/node-run-checks.yml@57b7fbaf07c295fe93485f75bcf65449b070794b  # node-run-checks-civ2
     with:
       node-version: "24.x"
       pnpm-version: "latest"
