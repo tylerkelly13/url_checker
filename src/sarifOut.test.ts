@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import Ajv2020 from 'ajv-draft-04';
+import addFormats from 'ajv-formats';
 import * as sarif from './sarifOut';
 import * as URL from './urlFunctions';
 import fs from 'fs';
@@ -536,6 +537,7 @@ describe('SARIF Output Module', () => {
 
   describe('SARIF schema validation', () => {
     const ajv = new Ajv2020({ strict: false });
+    addFormats(ajv);
     const validate = ajv.compile(sarifSchema);
 
     it('should produce output valid against the official SARIF 2.1.0 schema', () => {
