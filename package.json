@@ -10,19 +10,19 @@
   "scripts": {
     "url_checker": "tsx ./src/cli.ts",
     "apis": "typedoc",
-    "typecheck": "tsc --noEmit",
     "build": "pnpm install && rm -rf dist && tsc",
-    "packer": "pnpm run build && pnpm pack",
-    "lint": "eslint 'src/**/*.ts'",
-    "lint:fix": "eslint --fix 'src/**/*.ts'",
     "format": "prettier --write 'src/**/*.ts'",
     "format:check": "prettier --check 'src/**/*.ts'",
+    "lint": "eslint 'src/**/*.ts'",
+    "lint:fix": "eslint --fix 'src/**/*.ts'",
+    "packer": "pnpm run build && pnpm pack",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "test:watch": "vitest",
+    "check:types": "tsc --noEmit",
     "bump": "pnpm version --message 'chore: bump version to %s'",
-    "ci:check": "pnpm run lint && pnpm run format:check && pnpm run test:coverage && pnpm run typecheck && pnpm run build"
+    "ci:check": "pnpm run build && pnpm run check:types && pnpm run lint && pnpm run format:check && pnpm run test"
   },
   "typedocOptions": {
     "entryPoints": [
@@ -54,6 +54,7 @@
     "@vitest/coverage-v8": "^4.1.9",
     "@vitest/ui": "4.1.9",
     "ajv-draft-04": "^1.0.0",
+    "ajv-formats": "3.0.1",
     "eslint": "^10.5.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.6",

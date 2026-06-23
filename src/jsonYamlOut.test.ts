@@ -8,7 +8,7 @@ import {
 } from './jsonYamlOut';
 import { results } from './urlFunctions';
 import { writeFileSync } from 'fs';
-import yaml from 'js-yaml';
+import { load as yamlLoad } from 'js-yaml';
 
 vi.mock('fs');
 
@@ -381,7 +381,7 @@ describe('jsonYamlOut module - property-based tests', () => {
           const yamlContent = callArgs[1] as string;
 
           // Should be valid YAML
-          expect(() => yaml.load(yamlContent)).not.toThrow();
+          expect(() => yamlLoad(yamlContent)).not.toThrow();
         })
       );
     });
@@ -404,7 +404,7 @@ describe('jsonYamlOut module - property-based tests', () => {
 
           const callArgs = vi.mocked(writeFileSync).mock.calls[0];
           const yamlContent = callArgs[1] as string;
-          const parsed = yaml.load(yamlContent) as any;
+          const parsed = yamlLoad(yamlContent) as any;
 
           // Should have at least one key (the parentURL)
           const keys = Object.keys(parsed);
@@ -450,7 +450,7 @@ describe('jsonYamlOut module - property-based tests', () => {
       const callArgs = vi.mocked(writeFileSync).mock.calls[0];
       const yamlContent = callArgs[1] as string;
 
-      expect(yaml.load(yamlContent)).toEqual({});
+      expect(yamlLoad(yamlContent)).toEqual({});
     });
   });
 
@@ -478,7 +478,7 @@ describe('jsonYamlOut module - property-based tests', () => {
             const yamlCall = vi.mocked(writeFileSync).mock.calls[1];
 
             const jsonParsed = JSON.parse(jsonCall[1] as string);
-            const yamlParsed = yaml.load(yamlCall[1] as string);
+            const yamlParsed = yamlLoad(yamlCall[1] as string);
 
             expect(jsonParsed).toEqual(yamlParsed);
           }

@@ -1,4 +1,4 @@
-import yaml from 'js-yaml';
+import { dump as yamlDump } from 'js-yaml';
 import { writeFileSync } from 'fs';
 import * as URL from './urlFunctions';
 
@@ -79,6 +79,6 @@ export const linkCheckerYAML = async (
 ): Promise<void> => {
   const results = await finalResults;
   const restructured = resultsRestructure(results);
-  const yamlOutput = yaml.dump(restructured);
+  const yamlOutput = yamlDump(restructured);
   writeFileSync(outputFileName, yamlOutput);
 };
