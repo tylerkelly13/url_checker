@@ -1,0 +1,17 @@
+name: Tag on release
+description: Create and push a version tag when a bump-version pull request is merged.
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+permissions: {}
+
+jobs:
+  Tag:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'bump-v')
+    permissions:
+      contents: write  # push the version tag
+    uses: tylerkelly13/.github/.github/workflows/node-tag-on-merge.yml@1ff623ea5e7cda318232f423db33f7432c34eba7
