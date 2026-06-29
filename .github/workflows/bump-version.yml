@@ -1,0 +1,28 @@
+name: Bump version
+description: Bump the package version and open a pull request from the GitHub UI.
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Which part of the semver to bump
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions: {}
+
+jobs:
+  Bump:
+    permissions:
+      contents: write       # push the bump branch
+      pull-requests: write  # open the PR
+      actions: write        # required for artifact upload in checks
+    uses: tylerkelly13/.github/.github/workflows/node-bump-version.yml@1ff623ea5e7cda318232f423db33f7432c34eba7
+    with:
+      bump: ${{ inputs.bump }}
+      node-version: "24.x"
+      pnpm-version: "latest"
