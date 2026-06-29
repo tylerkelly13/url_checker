@@ -15,6 +15,8 @@ updates:
     directory: "/"
     commit-message:
       prefix: "chore(deps)"
+    groups:
+      applies-to: "version-updates"
     cooldown:
       default-days: 2
     schedule:
