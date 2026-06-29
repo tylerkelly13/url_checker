@@ -8,17 +8,12 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     cooldown:
-      default-days: 2
+      default-days: 3
     commit-message:
       prefix: "chore(deps)"
     schedule:
       interval: "cron"
       cronjob: "0 17 * * 0"
-    groups:
-      production-dependencies:
-        dependency-type: "production"
-      development-dependencies:
-        dependency-type: "development"
   - package-ecosystem: "github-actions"
     directory: "/"
     commit-message:
