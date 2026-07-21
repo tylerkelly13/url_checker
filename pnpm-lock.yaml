@@ -52,7 +52,7 @@ importers:
         specifier: ^4.1.10
         version: 4.1.10(vitest@4.1.10)
       '@vitest/ui':
-        specifier: 4.1.10
+        specifier: ^4.1.10
         version: 4.1.10(vitest@4.1.10)
       ajv-draft-04:
         specifier: ^1.0.0
