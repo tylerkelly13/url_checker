@@ -21,8 +21,7 @@ jobs:
     permissions:
       contents: read
       actions: write # required for artifact upload in reusable workflow
-      pull-requests: write # required by node-lint's TS7-support notify step
-    uses: tylerkelly13/.github/.github/workflows/node-run-checks.yml@37e0d2ccfe8acfc7e4a1ead850ddf0fc6b1f8958  # TEMPORARY: testing tylerkelly13/.github#19, revert to civ tag once merged
+    uses: tylerkelly13/.github/.github/workflows/node-run-checks.yml@a61ffaacf7bf37228d09f0c4130fb23e15e3e8f9  # node-run-checks-civ2
     with:
       node-version: "24.x"
       pnpm-version: "latest"
