@@ -22,7 +22,7 @@ jobs:
       contents: read
       actions: write # required for artifact upload in reusable workflow
       pull-requests: write # required by node-lint's TS7-support notify step
-    uses: tylerkelly13/.github/.github/workflows/node-run-checks.yml@85007ec0d095924e0312202ecd736260f2e274f8  # node-run-checks-civ5
+    uses: tylerkelly13/.github/.github/workflows/node-run-checks.yml@bd3ec6831727a1993786875d75584f57d9bf2440  # node-run-checks-civ6
     with:
       node-version: "24.x"
       pnpm-version: "latest"
