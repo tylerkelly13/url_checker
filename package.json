@@ -52,7 +52,7 @@
     "@typescript-eslint/eslint-plugin": "^8.71.1",
     "@typescript-eslint/parser": "^8.71.1",
     "@vitest/coverage-v8": "^5.0.3",
-    "@vitest/ui": "^5.0.3",
+    "@vitest/ui": "^5.0.5",
     "ajv-draft-04": "^1.0.0",
     "ajv-formats": "3.0.1",
     "eslint": "^10.12.0",
